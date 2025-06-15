@@ -252,8 +252,8 @@ export function AddVehicleSchedule() {
     }
   };
 
-  // Filter available vehicles (not currently in maintenance)
-  const availableVehicles = data.vehicles.filter(vehicle => vehicle.status !== 'maintenance');
+  // Show all vehicles in the fleet, including those in maintenance
+  const availableVehicles = data.vehicles;
   
   // Get selected vehicle details
   const selectedVehicle = formData.vehicleId ? data.vehicles.find(v => v.id === formData.vehicleId) : null;
@@ -419,7 +419,7 @@ export function AddVehicleSchedule() {
                     <option value="">Select a vehicle</option>
                     {availableVehicles.map((vehicle) => (
                       <option key={vehicle.id} value={vehicle.id}>
-                        {vehicle.name} - {vehicle.make} {vehicle.model} {vehicle.year}
+                        {vehicle.name} - {vehicle.make} {vehicle.model} {vehicle.year} ({vehicle.status})
                       </option>
                     ))}
                   </select>
@@ -438,7 +438,11 @@ export function AddVehicleSchedule() {
                       </div>
                       <div>
                         <span className="text-blue-700">Status:</span>
-                        <span className="ml-2 font-medium capitalize">{selectedVehicle.status}</span>
+                        <span className={`ml-2 font-medium capitalize ${
+                          selectedVehicle.status === 'maintenance' ? 'text-yellow-600' : ''
+                        }`}>
+                          {selectedVehicle.status}
+                        </span>
                       </div>
                       <div>
                         <span className="text-blue-700">Make/Model:</span>
@@ -449,6 +453,14 @@ export function AddVehicleSchedule() {
                         <span className="ml-2 font-medium">{selectedVehicle.year}</span>
                       </div>
                     </div>
+                    {selectedVehicle.status === 'maintenance' && (
+                      <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800">
+                          <strong>Note:</strong> This vehicle is currently undergoing maintenance. 
+                          Please ensure the schedule doesn't conflict with maintenance periods.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -655,7 +667,7 @@ export function AddVehicleSchedule() {
                 >
                   {isLoading ? (
                     <>
-                      <LoadingSpinner size="sm\" className="text-white mr-2" />
+                      <LoadingSpinner size="sm" className="text-white mr-2" />
                       Creating Schedule...
                     </>
                   ) : (
