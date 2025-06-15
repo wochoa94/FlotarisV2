@@ -16,6 +16,7 @@ import { MaintenanceOrderDetail } from './pages/MaintenanceOrderDetail';
 import { AddMaintenanceOrder } from './pages/AddMaintenanceOrder';
 import { EditMaintenanceOrder } from './pages/EditMaintenanceOrder';
 import { VehicleSchedules } from './pages/VehicleSchedules';
+import { AddVehicleSchedule } from './pages/AddVehicleSchedule';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -121,6 +122,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <VehicleSchedules />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/vehicle-schedules/new" element={
+        <ProtectedRoute>
+          <Layout>
+            <AddVehicleSchedule />
           </Layout>
         </ProtectedRoute>
       } />

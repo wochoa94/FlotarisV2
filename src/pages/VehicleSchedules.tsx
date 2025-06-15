@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, Edit, Plus, Search, Calendar, Truck, User, FileText, Trash2 } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
@@ -47,6 +47,7 @@ function ScheduleStatusBadge({ status }: { status: VehicleSchedule['status'] }) 
 export function VehicleSchedules() {
   const { data, loading, error } = useFleetData();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotesModal, setShowNotesModal] = useState<string | null>(null);
 
@@ -131,10 +132,9 @@ export function VehicleSchedules() {
   const activeCount = vehicleSchedules.filter(s => s.status === 'active').length;
   const completedCount = vehicleSchedules.filter(s => s.status === 'completed').length;
 
-  // Placeholder handlers for action buttons
+  // Handler for create schedule button
   const handleCreateSchedule = () => {
-    console.log('Create schedule clicked');
-    // TODO: Implement create schedule functionality
+    navigate('/vehicle-schedules/new');
   };
 
   const handleEditSchedule = (scheduleId: string) => {
@@ -425,7 +425,7 @@ export function VehicleSchedules() {
                   onClick={() => setShowNotesModal(null)}
                   className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
-                  <Eye className="h-6 w-6" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
               
