@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule } from '../types';
 import { transformDriver, transformVehicle, transformMaintenanceOrder, transformVehicleSchedule } from '../utils/dataTransform';
 import { handleMaintenanceStatusUpdates } from '../utils/maintenanceStatusHandler';
+import { handleVehicleScheduleStatusUpdates } from '../utils/vehicleScheduleStatusHandler';
 
 interface FleetDataContextType {
   data: FleetData;
@@ -72,38 +73,51 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
 
       // Check for automatic status updates
       console.log('Checking for automatic status updates...');
-      const statusUpdates = await handleMaintenanceStatusUpdates(
+      
+      // Handle maintenance order status updates
+      const maintenanceStatusUpdates = await handleMaintenanceStatusUpdates(
         transformedMaintenanceOrders,
         transformedVehicles
       );
 
+      // Handle vehicle schedule status updates
+      const scheduleStatusUpdates = await handleVehicleScheduleStatusUpdates(
+        transformedVehicleSchedules
+      );
+
+      const totalUpdates = maintenanceStatusUpdates.length + scheduleStatusUpdates.length;
+
       // If there were status updates, we need to re-fetch the data to get the latest state
-      if (statusUpdates.length > 0) {
-        console.log(`Applied ${statusUpdates.length} status updates, re-fetching data...`);
+      if (totalUpdates > 0) {
+        console.log(`Applied ${totalUpdates} status updates, re-fetching data...`);
         
         // Re-fetch the updated data
-        const [updatedVehiclesResponse, updatedMaintenanceOrdersResponse] = await Promise.all([
+        const [updatedVehiclesResponse, updatedMaintenanceOrdersResponse, updatedVehicleSchedulesResponse] = await Promise.all([
           supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
-          supabase.from('maintenance_orders').select('*').order('created_at', { ascending: false })
+          supabase.from('maintenance_orders').select('*').order('created_at', { ascending: false }),
+          supabase.from('vehicle_schedules').select('*').order('start_date', { ascending: false })
         ]);
 
         if (updatedVehiclesResponse.error) throw updatedVehiclesResponse.error;
         if (updatedMaintenanceOrdersResponse.error) throw updatedMaintenanceOrdersResponse.error;
+        if (updatedVehicleSchedulesResponse.error) throw updatedVehicleSchedulesResponse.error;
 
         // Transform the updated data
         const updatedTransformedVehicles: Vehicle[] = updatedVehiclesResponse.data.map(transformVehicle);
         const updatedTransformedMaintenanceOrders: MaintenanceOrder[] = updatedMaintenanceOrdersResponse.data.map(transformMaintenanceOrder);
+        const updatedTransformedVehicleSchedules: VehicleSchedule[] = updatedVehicleSchedulesResponse.data.map(transformVehicleSchedule);
 
         console.log('Updated data after status changes:', {
           vehicles: updatedTransformedVehicles.length,
-          maintenanceOrders: updatedTransformedMaintenanceOrders.length
+          maintenanceOrders: updatedTransformedMaintenanceOrders.length,
+          vehicleSchedules: updatedTransformedVehicleSchedules.length
         });
 
         setData({
           drivers: transformedDrivers,
           vehicles: updatedTransformedVehicles,
           maintenanceOrders: updatedTransformedMaintenanceOrders,
-          vehicleSchedules: transformedVehicleSchedules,
+          vehicleSchedules: updatedTransformedVehicleSchedules,
         });
       } else {
         console.log('No status updates needed, using original data');

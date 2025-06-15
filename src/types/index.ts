@@ -55,6 +55,7 @@ export interface VehicleSchedule {
   startDate: string;
   endDate: string;
   notes: string | null;
+  status: 'scheduled' | 'active' | 'completed';
   userId: string;
   createdAt: string;
   updatedAt: string;

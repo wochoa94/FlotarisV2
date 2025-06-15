@@ -164,6 +164,7 @@ export type Database = {
           start_date: string;
           end_date: string;
           notes: string | null;
+          status: 'scheduled' | 'active' | 'completed';
           user_id: string;
           created_at: string;
           updated_at: string;
@@ -175,6 +176,7 @@ export type Database = {
           start_date: string;
           end_date: string;
           notes?: string | null;
+          status?: 'scheduled' | 'active' | 'completed';
           user_id: string;
           created_at?: string;
           updated_at?: string;
@@ -186,6 +188,7 @@ export type Database = {
           start_date?: string;
           end_date?: string;
           notes?: string | null;
+          status?: 'scheduled' | 'active' | 'completed';
           user_id?: string;
           created_at?: string;
           updated_at?: string;

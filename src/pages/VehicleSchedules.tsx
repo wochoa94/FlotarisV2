@@ -4,6 +4,33 @@ import { Eye, Edit, Plus, Search, Calendar, Truck, User, FileText, Trash2 } from
 import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { VehicleSchedule } from '../types';
+
+// Status badge component for vehicle schedules
+function ScheduleStatusBadge({ status }: { status: VehicleSchedule['status'] }) {
+  const statusConfig = {
+    scheduled: {
+      label: 'Scheduled',
+      className: 'bg-blue-100 text-blue-800 border-blue-200',
+    },
+    active: {
+      label: 'Active',
+      className: 'bg-green-100 text-green-800 border-green-200',
+    },
+    completed: {
+      label: 'Completed',
+      className: 'bg-gray-100 text-gray-800 border-gray-200',
+    },
+  };
+
+  const config = statusConfig[status];
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
 
 export function VehicleSchedules() {
   const { data, loading, error } = useFleetData();
@@ -87,16 +114,10 @@ export function VehicleSchedules() {
     return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
   };
 
-  // Check if schedule is active (current date is between start and end)
-  const isActiveSchedule = (startDate: string, endDate: string): boolean => {
-    const today = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    today.setHours(0, 0, 0, 0);
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-    return today >= start && today <= end;
-  };
+  // Calculate summary statistics based on status field
+  const scheduledCount = vehicleSchedules.filter(s => s.status === 'scheduled').length;
+  const activeCount = vehicleSchedules.filter(s => s.status === 'active').length;
+  const completedCount = vehicleSchedules.filter(s => s.status === 'completed').length;
 
   // Placeholder handlers for action buttons
   const handleCreateSchedule = () => {
@@ -153,8 +174,8 @@ export function VehicleSchedules() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Schedules</dt>
-                  <dd className="text-lg font-medium text-gray-900">{vehicleSchedules.length}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Scheduled</dt>
+                  <dd className="text-lg font-medium text-gray-900">{scheduledCount}</dd>
                 </dl>
               </div>
             </div>
@@ -171,10 +192,26 @@ export function VehicleSchedules() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active Schedules</dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {vehicleSchedules.filter(s => isActiveSchedule(s.startDate, s.endDate)).length}
-                  </dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
+                  <dd className="text-lg font-medium text-gray-900">{activeCount}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="bg-gray-500 p-3 rounded-md">
+                  <Calendar className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                  <dd className="text-lg font-medium text-gray-900">{completedCount}</dd>
                 </dl>
               </div>
             </div>
@@ -191,30 +228,8 @@ export function VehicleSchedules() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Assigned Drivers</dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {new Set(vehicleSchedules.map(s => s.driverId)).size}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="bg-yellow-500 p-3 rounded-md">
-                  <Calendar className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Scheduled Vehicles</dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {new Set(vehicleSchedules.map(s => s.vehicleId)).size}
-                  </dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Total Schedules</dt>
+                  <dd className="text-lg font-medium text-gray-900">{vehicleSchedules.length}</dd>
                 </dl>
               </div>
             </div>
@@ -320,19 +335,7 @@ export function VehicleSchedules() {
                         {getScheduleDuration(schedule.startDate, schedule.endDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {isActiveSchedule(schedule.startDate, schedule.endDate) ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                            Active
-                          </span>
-                        ) : new Date(schedule.startDate) > new Date() ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                            Scheduled
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                            Completed
-                          </span>
-                        )}
+                        <ScheduleStatusBadge status={schedule.status} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
@@ -414,13 +417,20 @@ export function VehicleSchedules() {
                 </button>
               </div>
               
-              <div className="bg-gray-50 rounded-md p-4">
+              <div className="bg-gray-50 rounded-md p-4 mb-4">
                 <p className="text-sm text-gray-900 whitespace-pre-wrap">
                   {selectedSchedule.notes || 'No notes available for this schedule.'}
                 </p>
               </div>
+
+              <div className="bg-blue-50 rounded-md p-3 mb-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Status:</span>
+                  <ScheduleStatusBadge status={selectedSchedule.status} />
+                </div>
+              </div>
               
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end">
                 <button
                   onClick={() => setShowNotesModal(null)}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

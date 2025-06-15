@@ -64,6 +64,7 @@ export function transformVehicleSchedule(dbSchedule: any): VehicleSchedule {
     startDate: dbSchedule.start_date,
     endDate: dbSchedule.end_date,
     notes: dbSchedule.notes,
+    status: dbSchedule.status || 'scheduled', // Default to 'scheduled' if not set
     userId: dbSchedule.user_id,
     createdAt: dbSchedule.created_at,
     updatedAt: dbSchedule.updated_at,
@@ -136,6 +137,7 @@ export function transformVehicleScheduleForDB(schedule: Partial<VehicleSchedule>
   if (schedule.startDate !== undefined) dbSchedule.start_date = schedule.startDate;
   if (schedule.endDate !== undefined) dbSchedule.end_date = schedule.endDate;
   if (schedule.notes !== undefined) dbSchedule.notes = schedule.notes;
+  if (schedule.status !== undefined) dbSchedule.status = schedule.status;
   if (schedule.userId !== undefined) dbSchedule.user_id = schedule.userId;
   
   return dbSchedule;
