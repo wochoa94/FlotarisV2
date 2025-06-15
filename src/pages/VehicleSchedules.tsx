@@ -23,7 +23,19 @@ function ScheduleStatusBadge({ status }: { status: VehicleSchedule['status'] }) 
     },
   };
 
-  const config = statusConfig[status];
+  // Default configuration for unrecognized status values
+  const defaultConfig = {
+    label: 'Unknown',
+    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  };
+
+  // Get configuration for the status, with fallback to default
+  const config = statusConfig[status as keyof typeof statusConfig] || defaultConfig;
+  
+  // Log warning for unrecognized status values (helps with debugging)
+  if (!statusConfig[status as keyof typeof statusConfig]) {
+    console.warn(`Unrecognized schedule status: "${status}". Using default configuration.`);
+  }
   
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
