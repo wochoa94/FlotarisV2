@@ -655,7 +655,7 @@ export function AddVehicleSchedule() {
                 >
                   {isLoading ? (
                     <>
-                      <LoadingSpinner size="sm" className="text-white mr-2" />
+                      <LoadingSpinner size="sm\" className="text-white mr-2" />
                       Creating Schedule...
                     </>
                   ) : (
