@@ -156,6 +156,41 @@ export type Database = {
           updated_at?: string;
         };
       };
+      vehicle_schedules: {
+        Row: {
+          id: string;
+          vehicle_id: string;
+          driver_id: string;
+          start_date: string;
+          end_date: string;
+          notes: string | null;
+          user_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          vehicle_id: string;
+          driver_id: string;
+          start_date: string;
+          end_date: string;
+          notes?: string | null;
+          user_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          vehicle_id?: string;
+          driver_id?: string;
+          start_date?: string;
+          end_date?: string;
+          notes?: string | null;
+          user_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };

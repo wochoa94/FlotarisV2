@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Truck, Users, LogOut, Settings, Wrench } from 'lucide-react';
+import { Home, Truck, Users, LogOut, Settings, Wrench, Calendar } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navigation() {
@@ -30,6 +30,11 @@ export function Navigation() {
       name: 'Maintenance Orders',
       href: '/maintenance-orders',
       icon: Wrench,
+    },
+    {
+      name: 'Vehicle Schedules',
+      href: '/vehicle-schedules',
+      icon: Calendar,
     },
   ];
 

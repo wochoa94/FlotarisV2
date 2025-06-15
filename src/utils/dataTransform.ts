@@ -1,4 +1,4 @@
-import { Driver, Vehicle, MaintenanceOrder } from '../types';
+import { Driver, Vehicle, MaintenanceOrder, VehicleSchedule } from '../types';
 
 // Transform snake_case database fields to camelCase for UI consistency
 export function transformDriver(dbDriver: any): Driver {
@@ -53,6 +53,20 @@ export function transformMaintenanceOrder(dbOrder: any): MaintenanceOrder {
     cost: dbOrder.cost,
     createdAt: dbOrder.created_at,
     updatedAt: dbOrder.updated_at,
+  };
+}
+
+export function transformVehicleSchedule(dbSchedule: any): VehicleSchedule {
+  return {
+    id: dbSchedule.id,
+    vehicleId: dbSchedule.vehicle_id,
+    driverId: dbSchedule.driver_id,
+    startDate: dbSchedule.start_date,
+    endDate: dbSchedule.end_date,
+    notes: dbSchedule.notes,
+    userId: dbSchedule.user_id,
+    createdAt: dbSchedule.created_at,
+    updatedAt: dbSchedule.updated_at,
   };
 }
 
@@ -111,4 +125,18 @@ export function transformMaintenanceOrderForDB(order: Partial<MaintenanceOrder>)
   if (order.cost !== undefined) dbOrder.cost = order.cost;
   
   return dbOrder;
+}
+
+export function transformVehicleScheduleForDB(schedule: Partial<VehicleSchedule>): any {
+  const dbSchedule: any = {};
+  
+  if (schedule.id !== undefined) dbSchedule.id = schedule.id;
+  if (schedule.vehicleId !== undefined) dbSchedule.vehicle_id = schedule.vehicleId;
+  if (schedule.driverId !== undefined) dbSchedule.driver_id = schedule.driverId;
+  if (schedule.startDate !== undefined) dbSchedule.start_date = schedule.startDate;
+  if (schedule.endDate !== undefined) dbSchedule.end_date = schedule.endDate;
+  if (schedule.notes !== undefined) dbSchedule.notes = schedule.notes;
+  if (schedule.userId !== undefined) dbSchedule.user_id = schedule.userId;
+  
+  return dbSchedule;
 }

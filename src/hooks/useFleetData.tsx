@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import { FleetData, Driver, Vehicle, MaintenanceOrder } from '../types';
-import { transformDriver, transformVehicle, transformMaintenanceOrder } from '../utils/dataTransform';
+import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule } from '../types';
+import { transformDriver, transformVehicle, transformMaintenanceOrder, transformVehicleSchedule } from '../utils/dataTransform';
 import { handleMaintenanceStatusUpdates } from '../utils/maintenanceStatusHandler';
 
 interface FleetDataContextType {
@@ -14,7 +14,7 @@ interface FleetDataContextType {
 const FleetDataContext = createContext<FleetDataContextType | undefined>(undefined);
 
 export function FleetDataProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<FleetData>({ vehicles: [], drivers: [], maintenanceOrders: [] });
+  const [data, setData] = useState<FleetData>({ vehicles: [], drivers: [], maintenanceOrders: [], vehicleSchedules: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,15 +49,25 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
 
       if (maintenanceOrdersError) throw maintenanceOrdersError;
 
+      // Fetch vehicle schedules
+      const { data: vehicleSchedulesData, error: vehicleSchedulesError } = await supabase
+        .from('vehicle_schedules')
+        .select('*')
+        .order('start_date', { ascending: false });
+
+      if (vehicleSchedulesError) throw vehicleSchedulesError;
+
       // Transform data from snake_case to camelCase
       const transformedDrivers: Driver[] = driversData.map(transformDriver);
       const transformedVehicles: Vehicle[] = vehiclesData.map(transformVehicle);
       const transformedMaintenanceOrders: MaintenanceOrder[] = maintenanceOrdersData.map(transformMaintenanceOrder);
+      const transformedVehicleSchedules: VehicleSchedule[] = vehicleSchedulesData.map(transformVehicleSchedule);
 
       console.log('Data fetched and transformed:', {
         drivers: transformedDrivers.length,
         vehicles: transformedVehicles.length,
-        maintenanceOrders: transformedMaintenanceOrders.length
+        maintenanceOrders: transformedMaintenanceOrders.length,
+        vehicleSchedules: transformedVehicleSchedules.length
       });
 
       // Check for automatic status updates
@@ -93,6 +103,7 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
           drivers: transformedDrivers,
           vehicles: updatedTransformedVehicles,
           maintenanceOrders: updatedTransformedMaintenanceOrders,
+          vehicleSchedules: transformedVehicleSchedules,
         });
       } else {
         console.log('No status updates needed, using original data');
@@ -100,6 +111,7 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
           drivers: transformedDrivers,
           vehicles: transformedVehicles,
           maintenanceOrders: transformedMaintenanceOrders,
+          vehicleSchedules: transformedVehicleSchedules,
         });
       }
 

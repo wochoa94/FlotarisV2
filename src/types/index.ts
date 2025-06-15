@@ -48,6 +48,18 @@ export interface MaintenanceOrder {
   updatedAt: string;
 }
 
+export interface VehicleSchedule {
+  id: string;
+  vehicleId: string;
+  driverId: string;
+  startDate: string;
+  endDate: string;
+  notes: string | null;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -58,4 +70,5 @@ export interface FleetData {
   vehicles: Vehicle[];
   drivers: Driver[];
   maintenanceOrders: MaintenanceOrder[];
+  vehicleSchedules: VehicleSchedule[];
 }
