@@ -133,7 +133,7 @@ export function AddVehicleSchedule() {
     return null;
   };
 
-  // Step 3: Driver Selection Validation
+  // Step 3: Driver Selection and Notes Validation (Combined Final Step)
   const validateStep3 = (): string | null => {
     if (!formData.driverId) {
       return 'Driver selection is required';
@@ -153,21 +153,6 @@ export function AddVehicleSchedule() {
     return null;
   };
 
-  // Step 4: Final Validation
-  const validateStep4 = (): string | null => {
-    // All previous validations should pass
-    const step1Error = validateStep1();
-    if (step1Error) return step1Error;
-    
-    const step2Error = validateStep2();
-    if (step2Error) return step2Error;
-    
-    const step3Error = validateStep3();
-    if (step3Error) return step3Error;
-    
-    return null;
-  };
-
   const validateCurrentStep = (): boolean => {
     let error: string | null = null;
     
@@ -180,9 +165,6 @@ export function AddVehicleSchedule() {
         break;
       case 3:
         error = validateStep3();
-        break;
-      case 4:
-        error = validateStep4();
         break;
     }
     
@@ -199,7 +181,7 @@ export function AddVehicleSchedule() {
 
   const handleNext = () => {
     if (validateCurrentStep()) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep(prev => Math.min(prev + 1, 3));
     }
   };
 
@@ -285,12 +267,11 @@ export function AddVehicleSchedule() {
   // Get selected driver details
   const selectedDriver = formData.driverId ? data.drivers.find(d => d.id === formData.driverId) : null;
 
-  // Step configuration
+  // Step configuration (now only 3 steps)
   const steps = [
     { number: 1, title: 'Vehicle Selection', icon: Truck, unlocked: true },
     { number: 2, title: 'Date Range', icon: Calendar, unlocked: currentStep >= 2 || validateStep1() === null },
-    { number: 3, title: 'Driver Selection', icon: User, unlocked: currentStep >= 3 || (validateStep1() === null && validateStep2() === null) },
-    { number: 4, title: 'Notes & Submit', icon: FileText, unlocked: currentStep >= 4 || (validateStep1() === null && validateStep2() === null && validateStep3() === null) },
+    { number: 3, title: 'Driver & Notes', icon: User, unlocked: currentStep >= 3 || (validateStep1() === null && validateStep2() === null) },
   ];
 
   return (
@@ -548,12 +529,14 @@ export function AddVehicleSchedule() {
             </div>
           )}
 
-          {/* Step 3: Driver Selection */}
+          {/* Step 3: Driver Selection and Notes (Combined Final Step) */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Step 3: Select Driver</h3>
-                <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Step 3: Select Driver & Add Notes</h3>
+                
+                {/* Driver Selection */}
+                <div className="mb-6">
                   <label htmlFor="driverId" className="block text-sm font-medium text-gray-700 mb-1">
                     Driver *
                   </label>
@@ -575,7 +558,7 @@ export function AddVehicleSchedule() {
                 </div>
                 
                 {selectedDriver && (
-                  <div className="mt-4 bg-purple-50 rounded-md p-4">
+                  <div className="mb-6 bg-purple-50 rounded-md p-4">
                     <h4 className="text-sm font-medium text-purple-900 mb-2">Selected Driver Details</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
@@ -597,35 +580,30 @@ export function AddVehicleSchedule() {
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
 
-          {/* Step 4: Notes and Final Submission */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Step 4: Notes & Submit</h3>
-                
                 {/* Schedule Summary */}
                 <div className="bg-gray-50 rounded-md p-4 mb-6">
                   <h4 className="text-sm font-medium text-gray-900 mb-3">Schedule Summary</h4>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <span className="text-gray-500">Vehicle:</span>
-                      <span className="ml-2 font-medium">{selectedVehicle?.name}</span>
+                      <span className="ml-2 font-medium">{selectedVehicle?.name || 'Not selected'}</span>
                     </div>
                     <div>
                       <span className="text-gray-500">Driver:</span>
-                      <span className="ml-2 font-medium">{selectedDriver?.name}</span>
+                      <span className="ml-2 font-medium">{selectedDriver?.name || 'Not selected'}</span>
                     </div>
                     <div>
                       <span className="text-gray-500">Start Date:</span>
-                      <span className="ml-2 font-medium">{new Date(formData.startDate).toLocaleDateString()}</span>
+                      <span className="ml-2 font-medium">
+                        {formData.startDate ? new Date(formData.startDate).toLocaleDateString() : 'Not selected'}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-500">End Date:</span>
-                      <span className="ml-2 font-medium">{new Date(formData.endDate).toLocaleDateString()}</span>
+                      <span className="ml-2 font-medium">
+                        {formData.endDate ? new Date(formData.endDate).toLocaleDateString() : 'Not selected'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -677,7 +655,7 @@ export function AddVehicleSchedule() {
                 Cancel
               </Link>
               
-              {currentStep < 4 ? (
+              {currentStep < 3 ? (
                 <button
                   type="button"
                   onClick={handleNext}
