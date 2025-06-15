@@ -62,6 +62,30 @@ export function AddVehicleSchedule() {
     }
   };
 
+  // Handle Enter key press in notes textarea to prevent form submission
+  const handleNotesKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      // Allow Shift+Enter for new lines, but prevent plain Enter from submitting the form
+      e.preventDefault();
+      // Insert a new line manually
+      const textarea = e.target as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const newValue = value.substring(0, start) + '\n' + value.substring(end);
+      
+      setFormData(prev => ({
+        ...prev,
+        notes: newValue,
+      }));
+      
+      // Set cursor position after the inserted newline
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 1;
+      }, 0);
+    }
+  };
+
   // Step 1: Vehicle Selection Validation
   const validateStep1 = (): string | null => {
     if (!formData.vehicleId) {
@@ -616,10 +640,14 @@ export function AddVehicleSchedule() {
                     name="notes"
                     value={formData.notes}
                     onChange={handleInputChange}
+                    onKeyDown={handleNotesKeyDown}
                     rows={4}
                     className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Add any additional notes or special instructions for this schedule..."
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Press Shift+Enter for new lines. Enter alone will not submit the form.
+                  </p>
                 </div>
               </div>
             </div>
@@ -667,7 +695,7 @@ export function AddVehicleSchedule() {
                 >
                   {isLoading ? (
                     <>
-                      <LoadingSpinner size="sm\" className="text-white mr-2" />
+                      <LoadingSpinner size="sm" className="text-white mr-2" />
                       Creating Schedule...
                     </>
                   ) : (
