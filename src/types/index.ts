@@ -73,3 +73,34 @@ export interface FleetData {
   maintenanceOrders: MaintenanceOrder[];
   vehicleSchedules: VehicleSchedule[];
 }
+
+// Gantt Chart Types
+export type GanttItemType = 'schedule' | 'maintenance';
+
+export interface GanttItem {
+  id: string;
+  vehicleId: string;
+  type: GanttItemType;
+  title: string;
+  startDate: string;
+  endDate: string;
+  color: string;
+  details: {
+    driverName?: string;
+    orderNumber?: string;
+    description?: string;
+    status: string;
+    urgent?: boolean;
+    location?: string;
+    notes?: string;
+  };
+}
+
+export interface GanttVehicle {
+  id: string;
+  name: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  status: 'active' | 'maintenance' | 'idle';
+}

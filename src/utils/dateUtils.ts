@@ -1,6 +1,8 @@
 /**
- * Date utility functions for vehicle schedule overlap checking
+ * Date utility functions for vehicle schedule overlap checking and Gantt chart calculations
  */
+
+import { addDays, format, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 
 /**
  * Checks if a date range overlaps with another date range
@@ -111,4 +113,80 @@ export function getDaysBetween(startDate: string, endDate: string): number {
   const end = new Date(endDate);
   const diffTime = Math.abs(end.getTime() - start.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+// Gantt Chart specific date utilities
+
+/**
+ * Gets today's date as a Date object
+ * @returns Today's date
+ */
+export function getToday(): Date {
+  return startOfDay(new Date());
+}
+
+/**
+ * Adds specified number of days to a date
+ * @param date - Base date
+ * @param days - Number of days to add
+ * @returns New date
+ */
+export function addDaysToDate(date: Date, days: number): Date {
+  return addDays(date, days);
+}
+
+/**
+ * Gets the number of days between two dates (inclusive)
+ * @param startDate - Start date
+ * @param endDate - End date
+ * @returns Number of days
+ */
+export function getDaysBetweenDates(startDate: Date, endDate: Date): number {
+  return Math.abs(differenceInDays(endDate, startDate)) + 1;
+}
+
+/**
+ * Formats a date for display in the Gantt chart header
+ * @param date - Date to format
+ * @returns Formatted date string
+ */
+export function formatGanttDate(date: Date): string {
+  return format(date, 'MMM dd');
+}
+
+/**
+ * Formats a date for display in tooltips
+ * @param dateString - ISO date string
+ * @returns Formatted date string
+ */
+export function formatTooltipDate(dateString: string): string {
+  return format(new Date(dateString), 'MMM dd, yyyy');
+}
+
+/**
+ * Checks if a date is today
+ * @param date - Date to check
+ * @returns True if date is today
+ */
+export function isToday(date: Date): boolean {
+  const today = getToday();
+  return format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+}
+
+/**
+ * Converts a date string to a Date object at start of day
+ * @param dateString - ISO date string
+ * @returns Date object
+ */
+export function parseDate(dateString: string): Date {
+  return startOfDay(new Date(dateString));
+}
+
+/**
+ * Converts a date string to a Date object at end of day
+ * @param dateString - ISO date string
+ * @returns Date object
+ */
+export function parseDateEnd(dateString: string): Date {
+  return endOfDay(new Date(dateString));
 }
