@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
-import { FleetDataProvider } from './hooks/useFleetData';
+import { FleetDataProvider, useFleetData } from './hooks/useFleetData';
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -20,12 +20,19 @@ import { AddVehicleSchedule } from './pages/AddVehicleSchedule';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isReconciling } = useFleetData();
 
-  if (loading) {
+  // Show loading spinner during authentication or data reconciliation
+  if (authLoading || isReconciling) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-sm text-gray-600">
+            {authLoading ? 'Authenticating...' : 'Preparing your fleet data...'}
+          </p>
+        </div>
       </div>
     );
   }
