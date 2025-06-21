@@ -56,13 +56,19 @@ export function transformMaintenanceOrder(dbOrder: any): MaintenanceOrder {
   };
 }
 
+/**
+ * Transforms vehicle schedule data from database format to application format
+ * Handles date type columns (start_date, end_date) to prevent timezone-induced date shifts
+ */
 export function transformVehicleSchedule(dbSchedule: any): VehicleSchedule {
   return {
     id: dbSchedule.id,
     vehicleId: dbSchedule.vehicle_id,
     driverId: dbSchedule.driver_id,
-    startDate: dbSchedule.start_date,
-    endDate: dbSchedule.end_date,
+    // Extract YYYY-MM-DD portion from date type columns to ensure consistent local date interpretation
+    // This prevents timezone-induced day shifts when PostgreSQL date types are serialized as UTC midnight timestamps
+    startDate: dbSchedule.start_date ? dbSchedule.start_date.substring(0, 10) : '',
+    endDate: dbSchedule.end_date ? dbSchedule.end_date.substring(0, 10) : '',
     notes: dbSchedule.notes,
     status: dbSchedule.status || 'scheduled', // Default to 'scheduled' if not set
     userId: dbSchedule.user_id,
@@ -129,12 +135,17 @@ export function transformMaintenanceOrderForDB(order: Partial<MaintenanceOrder>)
   return dbOrder;
 }
 
+/**
+ * Transforms vehicle schedule data from application format to database format
+ * Handles date fields appropriately for PostgreSQL date type columns
+ */
 export function transformVehicleScheduleForDB(schedule: Partial<VehicleSchedule>): any {
   const dbSchedule: any = {};
   
   if (schedule.id !== undefined) dbSchedule.id = schedule.id;
   if (schedule.vehicleId !== undefined) dbSchedule.vehicle_id = schedule.vehicleId;
   if (schedule.driverId !== undefined) dbSchedule.driver_id = schedule.driverId;
+  // For date type columns, keep YYYY-MM-DD format (no timezone conversion needed)
   if (schedule.startDate !== undefined) dbSchedule.start_date = schedule.startDate;
   if (schedule.endDate !== undefined) dbSchedule.end_date = schedule.endDate;
   if (schedule.notes !== undefined) dbSchedule.notes = schedule.notes;

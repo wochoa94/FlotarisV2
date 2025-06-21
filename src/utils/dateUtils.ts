@@ -1,5 +1,6 @@
 /**
  * Date utility functions for vehicle schedule overlap checking and Gantt chart calculations
+ * Updated to handle consistent date interpretation for PostgreSQL date types
  */
 
 import { addDays, format, differenceInDays, startOfDay, endOfDay } from 'date-fns';
@@ -83,10 +84,23 @@ export function isMaintenanceOverlap(
 
 /**
  * Formats a date string for display
- * @param dateString - ISO date string
+ * Handles both YYYY-MM-DD strings (from date type columns) and ISO timestamp strings
+ * @param dateString - Date string (YYYY-MM-DD or ISO format)
  * @returns Formatted date string
  */
 export function formatDate(dateString: string): string {
+  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+  
+  // For ISO timestamp strings, use standard Date parsing
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -156,10 +170,19 @@ export function formatGanttDate(date: Date): string {
 
 /**
  * Formats a date for display in tooltips
- * @param dateString - ISO date string
+ * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * @param dateString - Date string
  * @returns Formatted date string
  */
 export function formatTooltipDate(dateString: string): string {
+  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+    return format(date, 'MMM dd, yyyy');
+  }
+  
+  // For ISO timestamp strings, use standard Date parsing
   return format(new Date(dateString), 'MMM dd, yyyy');
 }
 
@@ -175,19 +198,35 @@ export function isToday(date: Date): boolean {
 
 /**
  * Converts a date string to a Date object at start of day
- * @param dateString - ISO date string
+ * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * @param dateString - Date string
  * @returns Date object
  */
 export function parseDate(dateString: string): Date {
+  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return startOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
+  }
+  
+  // For ISO timestamp strings, use standard Date parsing
   return startOfDay(new Date(dateString));
 }
 
 /**
  * Converts a date string to a Date object at end of day
- * @param dateString - ISO date string
+ * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * @param dateString - Date string
  * @returns Date object
  */
 export function parseDateEnd(dateString: string): Date {
+  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return endOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
+  }
+  
+  // For ISO timestamp strings, use standard Date parsing
   return endOfDay(new Date(dateString));
 }
 
