@@ -279,14 +279,17 @@ export function GanttChart({
 
                       const isSchedule = item.type === 'schedule';
                       const isMaintenance = item.type === 'maintenance';
+                      const isCompleted = item.details.status === 'completed';
 
                       return (
                         <div
                           key={item.id}
                           className={`absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                            isSchedule 
-                              ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' 
-                              : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
+                            isCompleted
+                              ? 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-500'
+                              : isSchedule 
+                                ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' 
+                                : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
                           }`}
                           style={{
                             left: position.left,

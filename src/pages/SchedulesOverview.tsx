@@ -27,52 +27,48 @@ export function SchedulesOverview() {
       status: vehicle.status
     }));
 
-    // Transform vehicle schedules into Gantt items
-    const scheduleItems: GanttItem[] = vehicleSchedules
-      .filter(schedule => schedule.status !== 'completed') // Only show active and scheduled
-      .map(schedule => {
-        const driver = drivers.find(d => d.id === schedule.driverId);
-        
-        return {
-          id: schedule.id,
-          vehicleId: schedule.vehicleId,
-          type: 'schedule' as const,
-          title: driver ? driver.name : 'Unknown Driver',
-          startDate: schedule.startDate,
-          endDate: schedule.endDate,
-          color: '#1976D2', // Blue color for schedules
-          details: {
-            driverName: driver?.name,
-            status: schedule.status,
-            notes: schedule.notes || undefined
-          }
-        };
-      });
-
-    // Transform maintenance orders into Gantt items
-    const maintenanceItems: GanttItem[] = maintenanceOrders
-      .filter(order => order.status !== 'completed') // Only show pending, scheduled, and active
-      .map(order => ({
-        id: order.id,
-        vehicleId: order.vehicleId,
-        type: 'maintenance' as const,
-        title: order.orderNumber,
-        startDate: order.startDate,
-        endDate: order.estimatedCompletionDate,
-        color: '#FFC107', // Amber color for maintenance
+    // Transform vehicle schedules into Gantt items (include ALL schedules, including completed)
+    const scheduleItems: GanttItem[] = vehicleSchedules.map(schedule => {
+      const driver = drivers.find(d => d.id === schedule.driverId);
+      
+      return {
+        id: schedule.id,
+        vehicleId: schedule.vehicleId,
+        type: 'schedule' as const,
+        title: driver ? driver.name : 'Unknown Driver',
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        color: schedule.status === 'completed' ? '#808080' : '#1976D2', // Grey for completed, blue for others
         details: {
-          orderNumber: order.orderNumber,
-          description: order.description || undefined,
-          status: order.status,
-          urgent: order.urgent || false,
-          location: order.location || undefined
+          driverName: driver?.name,
+          status: schedule.status,
+          notes: schedule.notes || undefined
         }
-      }));
+      };
+    });
+
+    // Transform maintenance orders into Gantt items (include ALL orders, including completed)
+    const maintenanceItems: GanttItem[] = maintenanceOrders.map(order => ({
+      id: order.id,
+      vehicleId: order.vehicleId,
+      type: 'maintenance' as const,
+      title: order.orderNumber,
+      startDate: order.startDate,
+      endDate: order.estimatedCompletionDate,
+      color: order.status === 'completed' ? '#808080' : '#FFC107', // Grey for completed, amber for others
+      details: {
+        orderNumber: order.orderNumber,
+        description: order.description || undefined,
+        status: order.status,
+        urgent: order.urgent || false,
+        location: order.location || undefined
+      }
+    }));
 
     // Combine all items
     const ganttItems = [...scheduleItems, ...maintenanceItems];
 
-    // Calculate statistics
+    // Calculate statistics (only count non-completed items for active stats)
     const stats = {
       totalItems: ganttItems.length,
       activeSchedules: scheduleItems.filter(item => item.details.status === 'active').length,
@@ -203,6 +199,10 @@ export function SchedulesOverview() {
             <span className="text-sm text-gray-700">Maintenance Orders</span>
           </div>
           <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-gray-500 rounded"></div>
+            <span className="text-sm text-gray-700">Completed Items</span>
+          </div>
+          <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             <span className="text-sm text-gray-700">Active Vehicle</span>
           </div>
@@ -238,6 +238,7 @@ export function SchedulesOverview() {
           <li>• Hover over schedule blocks to see detailed information</li>
           <li>• Use keyboard navigation (Tab and Enter) for accessibility</li>
           <li>• Scroll horizontally to see more dates</li>
+          <li>• Completed items are shown in grey for historical reference</li>
         </ul>
       </div>
 
@@ -247,7 +248,7 @@ export function SchedulesOverview() {
           <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No schedules or maintenance orders</h3>
           <p className="text-gray-500 mb-4">
-            There are currently no active or scheduled items to display in the timeline.
+            There are currently no items to display in the timeline.
           </p>
           <div className="flex justify-center space-x-4">
             <a
