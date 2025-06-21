@@ -5,6 +5,7 @@ import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { VehicleSchedule } from '../types';
+import { getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 
 // Status badge component for vehicle schedules
 function ScheduleStatusBadge({ status }: { status: VehicleSchedule['status'] }) {
@@ -118,12 +119,11 @@ export function VehicleSchedules() {
     });
   };
 
-  // Calculate schedule duration
+  // Calculate schedule duration using the utility function for accurate inclusive day count
   const getScheduleDuration = (startDate: string, endDate: string): string => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const startDateObj = parseDate(startDate);
+    const endDateObj = parseDateEnd(endDate);
+    const diffDays = getDaysBetweenDates(startDateObj, endDateObj);
     return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
   };
 

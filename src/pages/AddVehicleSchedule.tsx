@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { supabase } from '../lib/supabase';
 import { transformVehicleScheduleForDB } from '../utils/dataTransform';
-import { isOverlap, isMaintenanceOverlap, getTodayString } from '../utils/dateUtils';
+import { isOverlap, isMaintenanceOverlap, getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface VehicleScheduleFormData {
@@ -516,10 +516,9 @@ export function AddVehicleSchedule() {
                     <h4 className="text-sm font-medium text-green-900 mb-2">Schedule Duration</h4>
                     <p className="text-sm text-green-700">
                       {(() => {
-                        const start = new Date(formData.startDate);
-                        const end = new Date(formData.endDate);
-                        const diffTime = Math.abs(end.getTime() - start.getTime());
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        const startDateObj = parseDate(formData.startDate);
+                        const endDateObj = parseDateEnd(formData.endDate);
+                        const diffDays = getDaysBetweenDates(startDateObj, endDateObj);
                         return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
                       })()}
                     </p>
