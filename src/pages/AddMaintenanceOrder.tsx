@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { supabase } from '../lib/supabase';
 import { transformMaintenanceOrderForDB } from '../utils/dataTransform';
+import { getTodayString } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface MaintenanceOrderFormData {
@@ -307,7 +308,7 @@ export function AddMaintenanceOrder() {
                 value={formData.startDate}
                 onChange={handleInputChange}
                 required
-                min={new Date().toISOString().split('T')[0]}
+                min={getTodayString()}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
@@ -324,7 +325,7 @@ export function AddMaintenanceOrder() {
                 value={formData.estimatedCompletionDate}
                 onChange={handleInputChange}
                 required
-                min={formData.startDate || new Date().toISOString().split('T')[0]}
+                min={formData.startDate || getTodayString()}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>

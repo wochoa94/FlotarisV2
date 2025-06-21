@@ -95,11 +95,11 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Gets today's date in YYYY-MM-DD format
+ * Gets today's date in YYYY-MM-DD format based on local timezone
  * @returns Today's date string
  */
 export function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
+  return format(new Date(), 'yyyy-MM-dd'); // Use date-fns format for local date
 }
 
 /**
@@ -189,4 +189,22 @@ export function parseDate(dateString: string): Date {
  */
 export function parseDateEnd(dateString: string): Date {
   return endOfDay(new Date(dateString));
+}
+
+/**
+ * Formats a UTC date string to local YYYY-MM-DD for date inputs
+ * @param utcDateString - UTC ISO date string
+ * @returns Local YYYY-MM-DD string
+ */
+export function formatUtcDateForInput(utcDateString: string): string {
+  return format(new Date(utcDateString), 'yyyy-MM-dd');
+}
+
+/**
+ * Converts a local YYYY-MM-DD date to UTC midnight for database storage
+ * @param localDateString - Local YYYY-MM-DD string
+ * @returns UTC ISO string with midnight time
+ */
+export function convertLocalDateToUtcMidnight(localDateString: string): string {
+  return `${localDateString}T00:00:00Z`;
 }

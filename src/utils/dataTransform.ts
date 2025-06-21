@@ -115,8 +115,9 @@ export function transformMaintenanceOrderForDB(order: Partial<MaintenanceOrder>)
   if (order.orderNumber !== undefined) dbOrder.order_number = order.orderNumber;
   if (order.vehicleId !== undefined) dbOrder.vehicle_id = order.vehicleId;
   if (order.status !== undefined) dbOrder.status = order.status;
-  if (order.startDate !== undefined) dbOrder.start_date = order.startDate;
-  if (order.estimatedCompletionDate !== undefined) dbOrder.estimated_completion_date = order.estimatedCompletionDate;
+  // Convert local YYYY-MM-DD from date input to UTC midnight for timestamp with time zone
+  if (order.startDate !== undefined) dbOrder.start_date = order.startDate ? `${order.startDate}T00:00:00Z` : null;
+  if (order.estimatedCompletionDate !== undefined) dbOrder.estimated_completion_date = order.estimatedCompletionDate ? `${order.estimatedCompletionDate}T00:00:00Z` : null;
   if (order.location !== undefined) dbOrder.location = order.location;
   if (order.type !== undefined) dbOrder.type = order.type;
   if (order.urgent !== undefined) dbOrder.urgent = order.urgent;
