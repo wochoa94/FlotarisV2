@@ -5,7 +5,7 @@ import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { VehicleSchedule } from '../types';
-import { getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
+import { getDaysBetweenDates, parseDate, parseDateEnd, formatTooltipDate } from '../utils/dateUtils';
 
 // Status badge component for vehicle schedules
 function ScheduleStatusBadge({ status }: { status: VehicleSchedule['status'] }) {
@@ -109,15 +109,6 @@ export function VehicleSchedules() {
       driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       schedule.notes?.toLowerCase().includes(searchTerm.toLowerCase());
   });
-
-  // Format date consistently
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   // Calculate schedule duration using the utility function for accurate inclusive day count
   const getScheduleDuration = (startDate: string, endDate: string): string => {
@@ -338,10 +329,10 @@ export function VehicleSchedules() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(schedule.startDate)}
+                        {formatTooltipDate(schedule.startDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(schedule.endDate)}
+                        {formatTooltipDate(schedule.endDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {getScheduleDuration(schedule.startDate, schedule.endDate)}
