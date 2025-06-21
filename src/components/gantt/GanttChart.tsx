@@ -172,13 +172,17 @@ export function GanttChart({
         </div>
       </div>
 
-      {/* Gantt Chart Container */}
-      <div className="relative">
-        {/* Date Headers */}
-        <div className="flex border-b border-gray-200 bg-gray-50">
-          {/* Vehicle Column Header */}
+      {/* Main Gantt Chart Container with Scrolling */}
+      <div 
+        ref={scrollContainerRef}
+        className="overflow-x-auto overflow-y-auto max-h-96 relative"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        {/* Date Headers - Sticky to top during vertical scroll */}
+        <div className="flex border-b border-gray-200 bg-gray-50 sticky top-0 z-30">
+          {/* Vehicle Column Header - Sticky to left and top */}
           <div 
-            className="flex-shrink-0 border-r border-gray-200 bg-gray-100 sticky left-0 z-20"
+            className="flex-shrink-0 border-r border-gray-200 bg-gray-100 sticky left-0 z-40"
             style={{ width: VEHICLE_COLUMN_WIDTH }}
           >
             <div className="p-3 font-semibold text-gray-900 text-sm">
@@ -186,7 +190,7 @@ export function GanttChart({
             </div>
           </div>
           
-          {/* Date Headers */}
+          {/* Date Headers - Scroll horizontally */}
           <div 
             className="flex"
             style={{ width: chartWidth }}
@@ -210,131 +214,124 @@ export function GanttChart({
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <div 
-          ref={scrollContainerRef}
-          className="overflow-x-auto overflow-y-auto max-h-96"
-          style={{ scrollbarWidth: 'thin' }}
-        >
-          <div className="relative">
-            {/* Vehicle Rows */}
-            {vehicles.map((vehicle, vehicleIndex) => {
-              const vehicleItems = itemsByVehicle[vehicle.id] || [];
-              
-              return (
-                <div
-                  key={vehicle.id}
-                  className="flex border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
-                  style={{ height: ROW_HEIGHT }}
+        {/* Vehicle Rows Content */}
+        <div className="relative">
+          {vehicles.map((vehicle, vehicleIndex) => {
+            const vehicleItems = itemsByVehicle[vehicle.id] || [];
+            
+            return (
+              <div
+                key={vehicle.id}
+                className="flex border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
+                style={{ height: ROW_HEIGHT }}
+              >
+                {/* Vehicle Info Column - Sticky to left */}
+                <div 
+                  className="flex-shrink-0 border-r border-gray-200 bg-white sticky left-0 z-20 flex items-center"
+                  style={{ width: VEHICLE_COLUMN_WIDTH }}
                 >
-                  {/* Vehicle Info Column (Sticky) */}
-                  <div 
-                    className="flex-shrink-0 border-r border-gray-200 bg-white sticky left-0 z-10 flex items-center"
-                    style={{ width: VEHICLE_COLUMN_WIDTH }}
-                  >
-                    <div className="p-3 w-full">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className={`w-3 h-3 rounded-full ${
-                            vehicle.status === 'active' ? 'bg-green-500' :
-                            vehicle.status === 'maintenance' ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`} />
+                  <div className="p-3 w-full">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <div className={`w-3 h-3 rounded-full ${
+                          vehicle.status === 'active' ? 'bg-green-500' :
+                          vehicle.status === 'maintenance' ? 'bg-yellow-500' :
+                          'bg-red-500'
+                        }`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {vehicle.name}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-900 truncate">
-                            {vehicle.name}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {vehicle.make} {vehicle.model} {vehicle.year}
-                          </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {vehicle.make} {vehicle.model} {vehicle.year}
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Timeline Area */}
-                  <div 
-                    className="relative flex-shrink-0"
-                    style={{ width: chartWidth }}
-                  >
-                    {/* Today Indicator */}
-                    {dateRange.map((date, dateIndex) => (
-                      isToday(date) && (
-                        <div
-                          key={`today-${dateIndex}`}
-                          className="absolute top-0 bottom-0 bg-blue-100 border-l-2 border-blue-400 opacity-50 pointer-events-none"
-                          style={{
-                            left: dateIndex * DAY_WIDTH_PX,
-                            width: DAY_WIDTH_PX
-                          }}
-                        />
-                      )
-                    ))}
+                {/* Timeline Area - Scrolls horizontally */}
+                <div 
+                  className="relative flex-shrink-0"
+                  style={{ width: chartWidth }}
+                >
+                  {/* Today Indicator */}
+                  {dateRange.map((date, dateIndex) => (
+                    isToday(date) && (
+                      <div
+                        key={`today-${dateIndex}`}
+                        className="absolute top-0 bottom-0 bg-blue-100 border-l-2 border-blue-400 opacity-50 pointer-events-none"
+                        style={{
+                          left: dateIndex * DAY_WIDTH_PX,
+                          width: DAY_WIDTH_PX
+                        }}
+                      />
+                    )
+                  ))}
 
-                    {/* Schedule and Maintenance Items */}
-                    {vehicleItems.map((item, itemIndex) => {
-                      const position = calculateItemPosition(item);
-                      if (!position) return null;
+                  {/* Schedule and Maintenance Items */}
+                  {vehicleItems.map((item, itemIndex) => {
+                    const position = calculateItemPosition(item);
+                    if (!position) return null;
 
-                      const isSchedule = item.type === 'schedule';
-                      const isMaintenance = item.type === 'maintenance';
-                      const isCompleted = item.details.status === 'completed';
+                    const isSchedule = item.type === 'schedule';
+                    const isMaintenance = item.type === 'maintenance';
+                    const isCompleted = item.details.status === 'completed';
 
-                      return (
-                        <div
-                          key={item.id}
-                          className={`absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                            isCompleted
-                              ? 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-500'
-                              : isSchedule 
-                                ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' 
-                                : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
-                          }`}
-                          style={{
-                            left: position.left,
-                            width: position.width,
-                            top: ITEM_MARGIN + (itemIndex % 2) * (ITEM_HEIGHT + ITEM_MARGIN),
-                            height: ITEM_HEIGHT
-                          }}
-                          onMouseEnter={(e) => handleItemMouseEnter(e, item)}
-                          onMouseLeave={handleItemMouseLeave}
-                          onKeyDown={(e) => handleItemKeyDown(e, item)}
-                          tabIndex={0}
-                          role="button"
-                          aria-label={`${item.type}: ${item.title}`}
-                        >
-                          <div className="flex items-center h-full px-2 text-white text-xs font-medium">
-                            <div className="flex items-center space-x-1 truncate">
-                              {isSchedule ? (
-                                <Truck className="h-3 w-3 flex-shrink-0" />
-                              ) : (
-                                <Wrench className="h-3 w-3 flex-shrink-0" />
-                              )}
-                              <span className="truncate">{item.title}</span>
-                              {item.details.urgent && (
-                                <AlertTriangle className="h-3 w-3 flex-shrink-0 text-red-200" />
-                              )}
-                            </div>
+                    return (
+                      <div
+                        key={item.id}
+                        className={`absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                          isCompleted
+                            ? 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-500'
+                            : isSchedule 
+                              ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' 
+                              : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
+                        }`}
+                        style={{
+                          left: position.left,
+                          width: position.width,
+                          top: ITEM_MARGIN + (itemIndex % 2) * (ITEM_HEIGHT + ITEM_MARGIN),
+                          height: ITEM_HEIGHT
+                        }}
+                        onMouseEnter={(e) => handleItemMouseEnter(e, item)}
+                        onMouseLeave={handleItemMouseLeave}
+                        onKeyDown={(e) => handleItemKeyDown(e, item)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${item.type}: ${item.title}`}
+                      >
+                        <div className="flex items-center h-full px-2 text-white text-xs font-medium">
+                          <div className="flex items-center space-x-1 truncate">
+                            {isSchedule ? (
+                              <Truck className="h-3 w-3 flex-shrink-0" />
+                            ) : (
+                              <Wrench className="h-3 w-3 flex-shrink-0" />
+                            )}
+                            <span className="truncate">{item.title}</span>
+                            {item.details.urgent && (
+                              <AlertTriangle className="h-3 w-3 flex-shrink-0 text-red-200" />
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Empty State */}
-            {vehicles.length === 0 && (
-              <div className="flex items-center justify-center py-12 text-gray-500">
-                <div className="text-center">
-                  <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-sm">No vehicles found</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            )}
-          </div>
+            );
+          })}
+
+          {/* Empty State */}
+          {vehicles.length === 0 && (
+            <div className="flex items-center justify-center py-12 text-gray-500">
+              <div className="text-center">
+                <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-sm">No vehicles found</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
