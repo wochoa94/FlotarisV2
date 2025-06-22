@@ -255,11 +255,6 @@ export function Drivers() {
                                 >
                                   {driver.name}
                                 </Link>
-                                {driver.address && (
-                                  <div className="text-sm text-gray-500 truncate max-w-xs">
-                                    {driver.address}
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </td>
