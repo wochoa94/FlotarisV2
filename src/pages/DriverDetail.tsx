@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, User, Mail, MapPin, Calendar, Truck, FileText, Clock } from 'lucide-react';
+import { ArrowLeft, Edit, User, Mail, MapPin, Calendar, Truck, Clock } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -414,36 +414,6 @@ export function DriverDetail() {
               <p className="text-gray-500">No vehicles currently assigned to this driver</p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* General Notes/Comments */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            <FileText className="h-5 w-5 inline mr-2" />
-            General Notes/Comments
-          </h3>
-          
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <FileText className="h-5 w-5 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <h4 className="text-sm font-medium text-yellow-800">Feature Not Available</h4>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>
-                    The current database schema does not include a dedicated field for general driver notes or comments. 
-                    To add this functionality, the database would need to be extended with a notes field in the drivers table.
-                  </p>
-                  <p className="mt-2">
-                    Currently, notes can be added to individual vehicle schedules in the Assignment History section above.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
