@@ -10,6 +10,7 @@ import { AddVehicle } from './pages/AddVehicle';
 import { EditVehicle } from './pages/EditVehicle';
 import { VehicleDetail } from './pages/VehicleDetail';
 import { Drivers } from './pages/Drivers';
+import { AddDriver } from './pages/AddDriver';
 import { DriverDetail } from './pages/DriverDetail';
 import { MaintenanceOrders } from './pages/MaintenanceOrders';
 import { MaintenanceOrderDetail } from './pages/MaintenanceOrderDetail';
@@ -88,6 +89,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <Drivers />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/drivers/new" element={
+        <ProtectedRoute>
+          <Layout>
+            <AddDriver />
           </Layout>
         </ProtectedRoute>
       } />
