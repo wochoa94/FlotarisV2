@@ -20,9 +20,16 @@ interface ReconciliationResult {
 /**
  * Performs startup reconciliation to fix vehicle-driver assignment inconsistencies
  * This function runs during application bootstrap to ensure data consistency
+ * @param vehicles - Raw vehicle data from database
+ * @param schedules - Raw schedule data from database
+ * @param maintenanceOrders - Raw maintenance order data from database
  * @returns Promise<ReconciliationResult> - Summary of reconciliation actions
  */
-export async function performStartupReconciliation(): Promise<ReconciliationResult> {
+export async function performStartupReconciliation(
+  vehicles: any[],
+  schedules: any[],
+  maintenanceOrders: any[]
+): Promise<ReconciliationResult> {
   const startTime = Date.now();
   const actions: ReconciliationAction[] = [];
   const errors: string[] = [];
@@ -31,43 +38,23 @@ export async function performStartupReconciliation(): Promise<ReconciliationResu
   console.log('Timestamp:', new Date().toISOString());
 
   try {
-    // Fetch current vehicles and schedules data directly from database
-    console.log('📊 Fetching current data from database...');
-    
-    const [vehiclesResponse, schedulesResponse] = await Promise.all([
-      supabase
-        .from('vehicles')
-        .select('id, name, status, driver_id, marca, model, year')
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('vehicle_schedules')
-        .select('id, vehicle_id, driver_id, status, start_date, end_date')
-        .in('status', ['active', 'scheduled'])
-        .order('start_date', { ascending: false })
-    ]);
+    console.log(`📋 Data provided: ${vehicles.length} vehicles, ${schedules.length} schedules, ${maintenanceOrders.length} maintenance orders`);
 
-    if (vehiclesResponse.error) {
-      throw new Error(`Failed to fetch vehicles: ${vehiclesResponse.error.message}`);
-    }
+    // Filter active/scheduled schedules and maintenance orders for analysis
+    const activeSchedules = schedules.filter(s => s.status === 'active' || s.status === 'scheduled');
+    const activeMaintenanceOrders = maintenanceOrders.filter(o => o.status === 'active' || o.status === 'scheduled');
 
-    if (schedulesResponse.error) {
-      throw new Error(`Failed to fetch schedules: ${schedulesResponse.error.message}`);
-    }
-
-    const vehicles = vehiclesResponse.data || [];
-    const schedules = schedulesResponse.data || [];
-
-    console.log(`📋 Data fetched: ${vehicles.length} vehicles, ${schedules.length} active/scheduled schedules`);
+    console.log(`📊 Active items: ${activeSchedules.length} schedules, ${activeMaintenanceOrders.length} maintenance orders`);
 
     // Identify inconsistencies and prepare fixes
-    const inconsistencies = await identifyInconsistencies(vehicles, schedules);
+    const inconsistencies = await identifyInconsistencies(vehicles, activeSchedules, activeMaintenanceOrders);
     
     console.log(`🔍 Found ${inconsistencies.length} inconsistencies to fix`);
 
     // Process each inconsistency
     for (const inconsistency of inconsistencies) {
       try {
-        const action = await processInconsistency(inconsistency, schedules);
+        const action = await processInconsistency(inconsistency, activeSchedules, activeMaintenanceOrders);
         if (action) {
           actions.push(action);
         }
@@ -126,7 +113,7 @@ interface VehicleInconsistency {
   vehicleName: string;
   currentStatus: string;
   currentDriverId: string | null;
-  inconsistencyType: 'active_without_driver' | 'non_active_with_driver';
+  inconsistencyType: 'active_without_driver' | 'non_active_with_driver' | 'active_stale_assignment';
   details: string;
 }
 
@@ -134,11 +121,13 @@ interface VehicleInconsistency {
  * Identifies vehicle-driver assignment inconsistencies
  * @param vehicles - Array of vehicles from database
  * @param schedules - Array of active/scheduled schedules from database
+ * @param maintenanceOrders - Array of active/scheduled maintenance orders from database
  * @returns Array of inconsistencies found
  */
 async function identifyInconsistencies(
   vehicles: any[],
-  schedules: any[]
+  schedules: any[],
+  maintenanceOrders: any[]
 ): Promise<VehicleInconsistency[]> {
   const inconsistencies: VehicleInconsistency[] = [];
 
@@ -174,6 +163,31 @@ async function identifyInconsistencies(
       
       console.log(`⚠️ Found inconsistency: ${vehicleName} is ${vehicle.status} but has assigned driver`);
     }
+
+    // NEW: Check for active vehicles with stale assignments
+    if (vehicle.status === 'active' && vehicle.driver_id) {
+      const hasActiveSchedule = schedules.some(s => 
+        s.vehicle_id === vehicle.id && s.status === 'active'
+      );
+      
+      const hasActiveMaintenanceOrder = maintenanceOrders.some(o => 
+        o.vehicle_id === vehicle.id && o.status === 'active'
+      );
+
+      // If vehicle is active with a driver but has no active schedule or maintenance order
+      if (!hasActiveSchedule && !hasActiveMaintenanceOrder) {
+        inconsistencies.push({
+          vehicleId: vehicle.id,
+          vehicleName,
+          currentStatus: vehicle.status,
+          currentDriverId: vehicle.driver_id,
+          inconsistencyType: 'active_stale_assignment',
+          details: `Vehicle is active with driver ${vehicle.driver_id} but has no active schedule or maintenance order`
+        });
+        
+        console.log(`⚠️ Found inconsistency: ${vehicleName} is active with driver but has no active schedule or maintenance`);
+      }
+    }
   }
 
   return inconsistencies;
@@ -183,11 +197,13 @@ async function identifyInconsistencies(
  * Processes a single inconsistency and applies the appropriate fix
  * @param inconsistency - The inconsistency to fix
  * @param schedules - Array of active/scheduled schedules for reference
+ * @param maintenanceOrders - Array of active/scheduled maintenance orders for reference
  * @returns Promise<ReconciliationAction | null> - Action performed or null if no action needed
  */
 async function processInconsistency(
   inconsistency: VehicleInconsistency,
-  schedules: any[]
+  schedules: any[],
+  maintenanceOrders: any[]
 ): Promise<ReconciliationAction | null> {
   console.log(`🔧 Processing inconsistency for vehicle ${inconsistency.vehicleId}: ${inconsistency.details}`);
 
@@ -195,6 +211,8 @@ async function processInconsistency(
     return await fixActiveVehicleWithoutDriver(inconsistency, schedules);
   } else if (inconsistency.inconsistencyType === 'non_active_with_driver') {
     return await fixNonActiveVehicleWithDriver(inconsistency);
+  } else if (inconsistency.inconsistencyType === 'active_stale_assignment') {
+    return await fixActiveStaleAssignment(inconsistency);
   }
 
   return null;
@@ -306,5 +324,41 @@ async function fixNonActiveVehicleWithDriver(
     oldValue: inconsistency.currentDriverId,
     newValue: null,
     reason: `Vehicle is ${inconsistency.currentStatus}, driver should not be assigned`
+  };
+}
+
+/**
+ * Fixes active vehicles with stale driver assignments (no active schedule or maintenance)
+ * @param inconsistency - The inconsistency details
+ * @returns Promise<ReconciliationAction | null> - Action performed or null
+ */
+async function fixActiveStaleAssignment(
+  inconsistency: VehicleInconsistency
+): Promise<ReconciliationAction | null> {
+  console.log(`🔄 Fixing stale active assignment for vehicle ${inconsistency.vehicleId}`);
+
+  const updateData = transformVehicleForDB({
+    status: 'idle',
+    assignedDriverId: null
+  });
+
+  const { error } = await supabase
+    .from('vehicles')
+    .update(updateData)
+    .eq('id', inconsistency.vehicleId);
+
+  if (error) {
+    throw new Error(`Failed to fix stale assignment: ${error.message}`);
+  }
+
+  console.log(`✅ Fixed stale assignment for vehicle ${inconsistency.vehicleId}: active → idle, unassigned driver`);
+
+  return {
+    type: 'vehicle_update',
+    vehicleId: inconsistency.vehicleId,
+    action: 'fix_stale_assignment',
+    oldValue: { status: 'active', driverId: inconsistency.currentDriverId },
+    newValue: { status: 'idle', driverId: null },
+    reason: 'Vehicle was active with driver but had no active schedule or maintenance order'
   };
 }

@@ -32,7 +32,24 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
       // STEP 1: Perform startup reconciliation first
       if (isReconciling) {
         console.log('🔄 Performing startup reconciliation...');
-        const reconciliationResult = await performStartupReconciliation();
+        
+        // Fetch data needed for reconciliation
+        const [vehiclesResponse, schedulesResponse, maintenanceOrdersResponse] = await Promise.all([
+          supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
+          supabase.from('vehicle_schedules').select('*').order('start_date', { ascending: false }),
+          supabase.from('maintenance_orders').select('*').order('created_at', { ascending: false })
+        ]);
+
+        if (vehiclesResponse.error) throw vehiclesResponse.error;
+        if (schedulesResponse.error) throw schedulesResponse.error;
+        if (maintenanceOrdersResponse.error) throw maintenanceOrdersResponse.error;
+
+        // Pass all necessary data to reconciliation service
+        const reconciliationResult = await performStartupReconciliation(
+          vehiclesResponse.data || [],
+          schedulesResponse.data || [],
+          maintenanceOrdersResponse.data || []
+        );
         
         console.log('📊 Reconciliation completed:', {
           inconsistencies: reconciliationResult.totalInconsistencies,
