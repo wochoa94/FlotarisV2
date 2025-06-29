@@ -1,13 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js'; // Comment out or remove this line
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+// const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// if (!supabaseUrl || !supabaseAnonKey) {
+//   throw new Error('Missing Supabase environment variables');
+// }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// export const supabase = createClient(supabaseUrl, supabaseAnonKey); // Comment out or remove this line
 
 export type Database = {
   public: {
