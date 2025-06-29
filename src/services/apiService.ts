@@ -190,6 +190,11 @@ export const vehicleService = {
     await apiCall(`/vehicles/${id}`, { method: 'DELETE' });
   },
 
+  async getVehicleById(id: string): Promise<Vehicle> {
+    const response = await apiCall(`/vehicles/${id}`);
+    return transformVehicle(response);
+  },
+
   async updateVehicleStatusAndDriver(id: string, status?: string, driverId?: string | null): Promise<Vehicle> {
     const updateData: any = {};
     if (status !== undefined) updateData.status = status;

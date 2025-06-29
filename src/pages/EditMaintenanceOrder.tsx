@@ -3,8 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformMaintenanceOrderForDB } from '../utils/dataTransform';
+import { maintenanceOrderService } from '../services/apiService';
 import { formatUtcDateForInput, getTodayString } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
@@ -149,18 +148,8 @@ export function EditMaintenanceOrder() {
         cost: formData.cost.trim() ? Number(formData.cost) : null,
       };
 
-      // Transform to database format
-      const dbUpdateData = transformMaintenanceOrderForDB(updateData);
-
-      // Update in database
-      const { error } = await supabase
-        .from('maintenance_orders')
-        .update(dbUpdateData)
-        .eq('id', order.id);
-
-      if (error) {
-        throw error;
-      }
+      // Update via API service
+      await maintenanceOrderService.updateMaintenanceOrder(order.id, updateData);
 
       // Success feedback
       setSuccessMessage('Maintenance order updated successfully!');

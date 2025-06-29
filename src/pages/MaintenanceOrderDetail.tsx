@@ -3,8 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Calendar, Clock, DollarSign, Truck, FileText, User, MapPin, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
-import { transformMaintenanceOrderForDB } from '../utils/dataTransform';
+import { maintenanceOrderService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AuthorizeMaintenanceOrderModal } from '../components/modals/AuthorizeMaintenanceOrderModal';
 
@@ -67,26 +66,12 @@ export function MaintenanceOrderDetail() {
     setErrorMessage('');
 
     try {
-      // Prepare update data
-      const updateData = {
-        status: 'scheduled' as const,
+      // Update maintenance order status and details via API service
+      await maintenanceOrderService.updateMaintenanceOrderStatus(order.id, 'scheduled', {
         cost: authData.cost,
         quotationDetails: authData.quotationDetails,
         comments: authData.comments,
-      };
-
-      // Transform to database format
-      const dbUpdateData = transformMaintenanceOrderForDB(updateData);
-
-      // Update in database
-      const { error } = await supabase
-        .from('maintenance_orders')
-        .update(dbUpdateData)
-        .eq('id', order.id);
-
-      if (error) {
-        throw error;
-      }
+      });
 
       // Success feedback
       setSuccessMessage('Maintenance order authorized successfully! Status changed to Scheduled.');

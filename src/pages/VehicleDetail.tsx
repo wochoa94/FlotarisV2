@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Calendar, Gauge, DollarSign, User, Settings, Trash2, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
+import { vehicleService } from '../services/apiService';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
@@ -36,14 +36,8 @@ export function VehicleDetail() {
     setErrorMessage('');
 
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .delete()
-        .eq('id', vehicle.id);
-
-      if (error) {
-        throw error;
-      }
+      // Delete via API service
+      await vehicleService.deleteVehicle(vehicle.id);
 
       // Success feedback
       setSuccessMessage('Vehicle deleted successfully!');
@@ -475,7 +469,7 @@ export function VehicleDetail() {
                 >
                   {isDeleting ? (
                     <>
-                      <LoadingSpinner size="sm\" className="text-white mr-2" />
+                      <LoadingSpinner size="sm" className="text-white mr-2" />
                       Deleting...
                     </>
                   ) : (

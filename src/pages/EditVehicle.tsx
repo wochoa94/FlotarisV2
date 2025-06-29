@@ -3,8 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformVehicleForDB } from '../utils/dataTransform';
+import { vehicleService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface EditVehicleFormData {
@@ -94,18 +93,8 @@ export function EditVehicle() {
         lastMaintenance: formData.lastMaintenance,
       };
 
-      // Transform to database format
-      const dbUpdateData = transformVehicleForDB(updateData);
-
-      // Update in database
-      const { error } = await supabase
-        .from('vehicles')
-        .update(dbUpdateData)
-        .eq('id', vehicle.id);
-
-      if (error) {
-        throw error;
-      }
+      // Update via API service
+      await vehicleService.updateVehicle(vehicle.id, updateData);
 
       // Success feedback
       setSuccessMessage('Vehicle updated successfully!');
@@ -359,7 +348,7 @@ export function EditVehicle() {
             >
               {isLoading ? (
                 <>
-                  <LoadingSpinner size="sm\" className="text-white mr-2" />
+                  <LoadingSpinner size="sm" className="text-white mr-2" />
                   Updating Vehicle...
                 </>
               ) : (
