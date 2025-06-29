@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformVehicleForDB } from '../utils/dataTransform';
+import { vehicleService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface VehicleFormData {
@@ -105,7 +104,7 @@ export function AddVehicle() {
     setIsLoading(true);
 
     try {
-      // Prepare vehicle data for database
+      // Prepare vehicle data
       const vehicleData = {
         name: formData.name.trim(),
         vin: formData.vin.trim().toUpperCase() || null,
@@ -123,17 +122,8 @@ export function AddVehicle() {
         userId: user?.id,
       };
 
-      // Transform to database format
-      const dbVehicleData = transformVehicleForDB(vehicleData);
-
-      // Insert into database
-      const { error } = await supabase
-        .from('vehicles')
-        .insert([dbVehicleData]);
-
-      if (error) {
-        throw error;
-      }
+      // Add vehicle via API service
+      await vehicleService.addVehicle(vehicleData);
 
       // Success feedback
       setSuccessMessage('Vehicle added successfully!');
@@ -420,7 +410,7 @@ export function AddVehicle() {
             >
               {isLoading ? (
                 <>
-                  <LoadingSpinner size="sm\" className="text-white mr-2" />
+                  <LoadingSpinner size="sm" className="text-white mr-2" />
                   Adding Vehicle...
                 </>
               ) : (

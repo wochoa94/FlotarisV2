@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, X, AlertCircle, CheckCircle, ChevronRight, ChevronLeft, Calendar, Truck, User, FileText } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformVehicleScheduleForDB } from '../utils/dataTransform';
+import { vehicleScheduleService } from '../services/apiService';
 import { isOverlap, isMaintenanceOverlap, getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
@@ -204,7 +203,7 @@ export function AddVehicleSchedule() {
     setIsLoading(true);
 
     try {
-      // Prepare vehicle schedule data for database
+      // Prepare vehicle schedule data
       const scheduleData = {
         vehicleId: formData.vehicleId,
         driverId: formData.driverId,
@@ -215,17 +214,8 @@ export function AddVehicleSchedule() {
         userId: user?.id || '',
       };
 
-      // Transform to database format
-      const dbScheduleData = transformVehicleScheduleForDB(scheduleData);
-
-      // Insert into database
-      const { error } = await supabase
-        .from('vehicle_schedules')
-        .insert([dbScheduleData]);
-
-      if (error) {
-        throw error;
-      }
+      // Add vehicle schedule via API service
+      await vehicleScheduleService.addVehicleSchedule(scheduleData);
 
       // Success feedback
       setSuccessMessage('Vehicle schedule created successfully!');

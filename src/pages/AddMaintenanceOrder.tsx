@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformMaintenanceOrderForDB } from '../utils/dataTransform';
+import { maintenanceOrderService } from '../services/apiService';
 import { getTodayString } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
@@ -123,7 +122,7 @@ export function AddMaintenanceOrder() {
     setIsLoading(true);
 
     try {
-      // Prepare maintenance order data for database
+      // Prepare maintenance order data
       const orderData = {
         vehicleId: formData.vehicleId,
         status: 'pending_authorization' as const,
@@ -139,17 +138,8 @@ export function AddMaintenanceOrder() {
         cost: Number(formData.cost),
       };
 
-      // Transform to database format
-      const dbOrderData = transformMaintenanceOrderForDB(orderData);
-
-      // Insert into database
-      const { error } = await supabase
-        .from('maintenance_orders')
-        .insert([dbOrderData]);
-
-      if (error) {
-        throw error;
-      }
+      // Add maintenance order via API service
+      await maintenanceOrderService.addMaintenanceOrder(orderData);
 
       // Success feedback
       setSuccessMessage('Maintenance order created successfully!');

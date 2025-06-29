@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, X, AlertCircle, CheckCircle, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
-import { supabase } from '../lib/supabase';
-import { transformDriverForDB } from '../utils/dataTransform';
+import { driverService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface DriverFormData {
@@ -89,26 +88,6 @@ export function AddDriver() {
     return null;
   };
 
-  const checkEmailUniqueness = async (email: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase
-        .from('drivers')
-        .select('id')
-        .eq('email', email.trim().toLowerCase())
-        .limit(1);
-
-      if (error) {
-        console.error('Error checking email uniqueness:', error);
-        return false; // Assume not unique on error to be safe
-      }
-
-      return data.length === 0; // True if no existing driver found
-    } catch (error) {
-      console.error('Error checking email uniqueness:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -127,14 +106,14 @@ export function AddDriver() {
 
     try {
       // Check email uniqueness
-      const isEmailUnique = await checkEmailUniqueness(formData.email);
+      const isEmailUnique = await driverService.checkEmailUniqueness(formData.email);
       if (!isEmailUnique) {
         setErrorMessage('A driver with this email address already exists');
         setIsLoading(false);
         return;
       }
 
-      // Prepare driver data for database
+      // Prepare driver data
       const driverData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
@@ -144,19 +123,8 @@ export function AddDriver() {
         userId: null, // No linked user account
       };
 
-      // Transform to database format
-      const dbDriverData = transformDriverForDB(driverData);
-
-      // Insert into database
-      const { data, error } = await supabase
-        .from('drivers')
-        .insert([dbDriverData])
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
+      // Add driver via API service
+      await driverService.addDriver(driverData);
 
       // Success feedback
       setSuccessMessage(`Driver "${driverData.name}" added successfully!`);
@@ -171,17 +139,11 @@ export function AddDriver() {
 
     } catch (error) {
       console.error('Error adding driver:', error);
-      
-      // Handle specific database errors
-      if (error instanceof Error) {
-        if (error.message.includes('drivers_email_key')) {
-          setErrorMessage('A driver with this email address already exists');
-        } else {
-          setErrorMessage(`Failed to add driver: ${error.message}`);
-        }
-      } else {
-        setErrorMessage('Failed to add driver. Please try again.');
-      }
+      setErrorMessage(
+        error instanceof Error 
+          ? `Failed to add driver: ${error.message}`
+          : 'Failed to add driver. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
