@@ -1,13 +1,3 @@
-import {
-  transformDriver,
-  transformVehicle,
-  transformMaintenanceOrder,
-  transformVehicleSchedule,
-  transformDriverForDB,
-  transformVehicleForDB,
-  transformMaintenanceOrderForDB,
-  transformVehicleScheduleForDB,
-} from '../utils/dataTransform';
 import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User } from '../types';
 
 // IMPORTANT: Replace this with the actual URL of your running backend service.
@@ -53,16 +43,17 @@ async function apiCall(endpoint: string, options: RequestInit = {}): Promise<any
 // Fleet Data Service
 export async function fetchFleetData(): Promise<FleetData> {
   try {
-    const rawData = await apiCall('/fleet');
+    const data = await apiCall('/fleet');
 
-    const transformedData: FleetData = {
-      vehicles: rawData.vehicles.map(transformVehicle),
-      drivers: rawData.drivers.map(transformDriver),
-      maintenanceOrders: rawData.maintenance_orders.map(transformMaintenanceOrder),
-      vehicleSchedules: rawData.vehicle_schedules.map(transformVehicleSchedule),
+    // Backend now returns camelCase data directly
+    const fleetData: FleetData = {
+      vehicles: data.vehicles,
+      drivers: data.drivers,
+      maintenanceOrders: data.maintenanceOrders,
+      vehicleSchedules: data.vehicleSchedules,
     };
 
-    return transformedData;
+    return fleetData;
   } catch (error) {
     console.error('Error fetching fleet data:', error);
     throw error;
@@ -134,21 +125,19 @@ export const authService = {
 // Driver Service
 export const driverService = {
   async addDriver(driverData: Partial<Driver>): Promise<Driver> {
-    const dbData = transformDriverForDB(driverData);
     const response = await apiCall('/drivers', {
       method: 'POST',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(driverData),
     });
-    return transformDriver(response);
+    return response;
   },
 
   async updateDriver(id: string, driverData: Partial<Driver>): Promise<Driver> {
-    const dbData = transformDriverForDB(driverData);
     const response = await apiCall(`/drivers/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(driverData),
     });
-    return transformDriver(response);
+    return response;
   },
 
   async deleteDriver(id: string): Promise<void> {
@@ -169,21 +158,19 @@ export const driverService = {
 // Vehicle Service
 export const vehicleService = {
   async addVehicle(vehicleData: Partial<Vehicle>): Promise<Vehicle> {
-    const dbData = transformVehicleForDB(vehicleData);
     const response = await apiCall('/vehicles', {
       method: 'POST',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(vehicleData),
     });
-    return transformVehicle(response);
+    return response;
   },
 
   async updateVehicle(id: string, vehicleData: Partial<Vehicle>): Promise<Vehicle> {
-    const dbData = transformVehicleForDB(vehicleData);
     const response = await apiCall(`/vehicles/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(vehicleData),
     });
-    return transformVehicle(response);
+    return response;
   },
 
   async deleteVehicle(id: string): Promise<void> {
@@ -192,40 +179,38 @@ export const vehicleService = {
 
   async getVehicleById(id: string): Promise<Vehicle> {
     const response = await apiCall(`/vehicles/${id}`);
-    return transformVehicle(response);
+    return response;
   },
 
   async updateVehicleStatusAndDriver(id: string, status?: string, driverId?: string | null): Promise<Vehicle> {
     const updateData: any = {};
     if (status !== undefined) updateData.status = status;
-    if (driverId !== undefined) updateData.driver_id = driverId;
+    if (driverId !== undefined) updateData.assignedDriverId = driverId;
 
     const response = await apiCall(`/vehicles/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify(updateData),
     });
-    return transformVehicle(response);
+    return response;
   },
 };
 
 // Maintenance Order Service
 export const maintenanceOrderService = {
   async addMaintenanceOrder(orderData: Partial<MaintenanceOrder>): Promise<MaintenanceOrder> {
-    const dbData = transformMaintenanceOrderForDB(orderData);
     const response = await apiCall('/maintenance-orders', {
       method: 'POST',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(orderData),
     });
-    return transformMaintenanceOrder(response);
+    return response;
   },
 
   async updateMaintenanceOrder(id: string, orderData: Partial<MaintenanceOrder>): Promise<MaintenanceOrder> {
-    const dbData = transformMaintenanceOrderForDB(orderData);
     const response = await apiCall(`/maintenance-orders/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(orderData),
     });
-    return transformMaintenanceOrder(response);
+    return response;
   },
 
   async deleteMaintenanceOrder(id: string): Promise<void> {
@@ -234,33 +219,30 @@ export const maintenanceOrderService = {
 
   async updateMaintenanceOrderStatus(id: string, status: string, additionalData?: any): Promise<MaintenanceOrder> {
     const updateData = { status, ...additionalData };
-    const dbData = transformMaintenanceOrderForDB(updateData);
     const response = await apiCall(`/maintenance-orders/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(updateData),
     });
-    return transformMaintenanceOrder(response);
+    return response;
   },
 };
 
 // Vehicle Schedule Service
 export const vehicleScheduleService = {
   async addVehicleSchedule(scheduleData: Partial<VehicleSchedule>): Promise<VehicleSchedule> {
-    const dbData = transformVehicleScheduleForDB(scheduleData);
     const response = await apiCall('/vehicle-schedules', {
       method: 'POST',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(scheduleData),
     });
-    return transformVehicleSchedule(response);
+    return response;
   },
 
   async updateVehicleSchedule(id: string, scheduleData: Partial<VehicleSchedule>): Promise<VehicleSchedule> {
-    const dbData = transformVehicleScheduleForDB(scheduleData);
     const response = await apiCall(`/vehicle-schedules/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(dbData),
+      body: JSON.stringify(scheduleData),
     });
-    return transformVehicleSchedule(response);
+    return response;
   },
 
   async deleteVehicleSchedule(id: string): Promise<void> {
@@ -272,18 +254,18 @@ export const vehicleScheduleService = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
-    return transformVehicleSchedule(response);
+    return response;
   },
 
   async fetchActiveSchedulesForVehicle(vehicleId: string): Promise<VehicleSchedule[]> {
     const response = await apiCall(`/vehicle-schedules/vehicle/${vehicleId}/active`);
-    return response.map(transformVehicleSchedule);
+    return response;
   },
 
   async fetchOtherSchedulesForVehicle(vehicleId: string, excludeScheduleId: string, statuses: string[]): Promise<VehicleSchedule[]> {
     const statusQuery = statuses.map(s => `status=${s}`).join('&');
     const response = await apiCall(`/vehicle-schedules/vehicle/${vehicleId}/other?exclude=${excludeScheduleId}&${statusQuery}`);
-    return response.map(transformVehicleSchedule);
+    return response;
   },
 };
 
@@ -292,6 +274,6 @@ export const queryService = {
   async fetchMaintenanceOrdersByVehicleAndStatus(vehicleId: string, statuses: string[]): Promise<MaintenanceOrder[]> {
     const statusQuery = statuses.map(s => `status=${s}`).join('&');
     const response = await apiCall(`/maintenance-orders/vehicle/${vehicleId}?${statusQuery}`);
-    return response.map(transformMaintenanceOrder);
+    return response;
   },
 };
