@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, X, AlertCircle, CheckCircle, ChevronRight, ChevronLeft
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { vehicleScheduleService } from '../services/apiService';
-import { isOverlap, isMaintenanceOverlap, getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
+import { getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface VehicleScheduleFormData {
@@ -85,85 +85,53 @@ export function AddVehicleSchedule() {
     }
   };
 
-  // Step 1: Vehicle Selection Validation
-  const validateStep1 = (): string | null => {
-    if (!formData.vehicleId) {
-      return 'Vehicle selection is required';
-    }
-    
-    const vehicle = data.vehicles.find(v => v.id === formData.vehicleId);
-    if (!vehicle) {
-      return 'Selected vehicle not found';
-    }
-    
-    return null;
-  };
-
-  // Step 2: Date Range Validation
-  const validateStep2 = (): string | null => {
-    if (!formData.startDate) return 'Start date is required';
-    if (!formData.endDate) return 'End date is required';
-    
-    const startDate = new Date(formData.startDate);
-    const endDate = new Date(formData.endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (startDate < today) {
-      return 'Start date cannot be in the past';
-    }
-    
-    if (endDate <= startDate) {
-      return 'End date must be after start date';
-    }
-
-    // Check for vehicle schedule overlaps
-    const vehicleSchedules = data.vehicleSchedules.filter(s => s.vehicleId === formData.vehicleId);
-    if (isOverlap(formData.startDate, formData.endDate, vehicleSchedules)) {
-      return 'Vehicle unavailable during selected dates. Please select different dates or vehicle.';
-    }
-
-    // Check for maintenance order overlaps
-    const maintenanceOrders = data.maintenanceOrders.filter(o => o.vehicleId === formData.vehicleId);
-    if (isMaintenanceOverlap(formData.startDate, formData.endDate, maintenanceOrders)) {
-      return 'Vehicle unavailable during selected dates. Please select different dates or vehicle.';
-    }
-
-    return null;
-  };
-
-  // Step 3: Driver Selection and Notes Validation (Combined Final Step)
-  const validateStep3 = (): string | null => {
-    if (!formData.driverId) {
-      return 'Driver selection is required';
-    }
-    
-    const driver = data.drivers.find(d => d.id === formData.driverId);
-    if (!driver) {
-      return 'Selected driver not found';
-    }
-
-    // Check for driver schedule overlaps
-    const driverSchedules = data.vehicleSchedules.filter(s => s.driverId === formData.driverId);
-    if (isOverlap(formData.startDate, formData.endDate, driverSchedules)) {
-      return 'Driver unavailable during selected dates. Please select different driver or adjust schedule.';
-    }
-
-    return null;
-  };
-
+  // Basic validation for each step (no overlap checks - handled by backend)
   const validateCurrentStep = (): boolean => {
     let error: string | null = null;
     
     switch (currentStep) {
       case 1:
-        error = validateStep1();
+        // Step 1: Vehicle Selection
+        if (!formData.vehicleId) {
+          error = 'Vehicle selection is required';
+        } else {
+          const vehicle = data.vehicles.find(v => v.id === formData.vehicleId);
+          if (!vehicle) {
+            error = 'Selected vehicle not found';
+          }
+        }
         break;
+        
       case 2:
-        error = validateStep2();
+        // Step 2: Date Range
+        if (!formData.startDate) {
+          error = 'Start date is required';
+        } else if (!formData.endDate) {
+          error = 'End date is required';
+        } else {
+          const startDate = new Date(formData.startDate);
+          const endDate = new Date(formData.endDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (startDate < today) {
+            error = 'Start date cannot be in the past';
+          } else if (endDate <= startDate) {
+            error = 'End date must be after start date';
+          }
+        }
         break;
+        
       case 3:
-        error = validateStep3();
+        // Step 3: Driver Selection
+        if (!formData.driverId) {
+          error = 'Driver selection is required';
+        } else {
+          const driver = data.drivers.find(d => d.id === formData.driverId);
+          if (!driver) {
+            error = 'Selected driver not found';
+          }
+        }
         break;
     }
     
@@ -195,7 +163,7 @@ export function AddVehicleSchedule() {
     setSuccessMessage('');
     setErrorMessage('');
     
-    // Final validation
+    // Basic validation only - overlap checks handled by backend
     if (!validateCurrentStep()) {
       return;
     }
@@ -214,7 +182,7 @@ export function AddVehicleSchedule() {
         userId: user?.id || '',
       };
 
-      // Add vehicle schedule via API service
+      // Add vehicle schedule via API service - backend will handle overlap validation
       await vehicleScheduleService.addVehicleSchedule(scheduleData);
 
       // Success feedback
@@ -230,11 +198,16 @@ export function AddVehicleSchedule() {
 
     } catch (error) {
       console.error('Error creating vehicle schedule:', error);
-      setErrorMessage(
-        error instanceof Error 
-          ? `Failed to create vehicle schedule: ${error.message}`
-          : 'Failed to create vehicle schedule. Please try again.'
-      );
+      
+      // Handle specific backend validation errors
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create vehicle schedule. Please try again.';
+      
+      // Check for overlap-related errors from backend
+      if (errorMessage.includes('unavailable') || errorMessage.includes('conflict') || errorMessage.includes('overlap')) {
+        setErrorMessage(`Schedule conflict: ${errorMessage}`);
+      } else {
+        setErrorMessage(`Failed to create vehicle schedule: ${errorMessage}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -257,11 +230,26 @@ export function AddVehicleSchedule() {
   // Get selected driver details
   const selectedDriver = formData.driverId ? data.drivers.find(d => d.id === formData.driverId) : null;
 
-  // Step configuration (now only 3 steps)
+  // Step configuration - simplified unlocked logic
   const steps = [
-    { number: 1, title: 'Vehicle Selection', icon: Truck, unlocked: true },
-    { number: 2, title: 'Date Range', icon: Calendar, unlocked: currentStep >= 2 || validateStep1() === null },
-    { number: 3, title: 'Driver & Notes', icon: User, unlocked: currentStep >= 3 || (validateStep1() === null && validateStep2() === null) },
+    { 
+      number: 1, 
+      title: 'Vehicle Selection', 
+      icon: Truck, 
+      unlocked: true 
+    },
+    { 
+      number: 2, 
+      title: 'Date Range', 
+      icon: Calendar, 
+      unlocked: currentStep >= 2 || !!formData.vehicleId 
+    },
+    { 
+      number: 3, 
+      title: 'Driver & Notes', 
+      icon: User, 
+      unlocked: currentStep >= 3 || (!!formData.vehicleId && !!formData.startDate && !!formData.endDate) 
+    },
   ];
 
   return (
@@ -452,7 +440,7 @@ export function AddVehicleSchedule() {
                       <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <p className="text-sm text-yellow-800">
                           <strong>Note:</strong> This vehicle is currently undergoing maintenance. 
-                          Please ensure the schedule doesn't conflict with maintenance periods.
+                          The backend will validate schedule conflicts with maintenance periods.
                         </p>
                       </div>
                     )}
@@ -518,7 +506,7 @@ export function AddVehicleSchedule() {
             </div>
           )}
 
-          {/* Step 3: Driver Selection and Notes (Combined Final Step) */}
+          {/* Step 3: Driver Selection and Notes */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
