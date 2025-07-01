@@ -138,7 +138,7 @@ export function AddMaintenanceOrder() {
         cost: Number(formData.cost),
       };
 
-      // Add maintenance order via API service
+      // Add maintenance order via API service - backend will handle overlap validation
       await maintenanceOrderService.addMaintenanceOrder(orderData);
 
       // Success feedback
@@ -154,11 +154,21 @@ export function AddMaintenanceOrder() {
 
     } catch (error) {
       console.error('Error creating maintenance order:', error);
-      setErrorMessage(
-        error instanceof Error 
-          ? `Failed to create maintenance order: ${error.message}`
-          : 'Failed to create maintenance order. Please try again.'
-      );
+      
+      // Handle specific backend validation errors
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create maintenance order. Please try again.';
+      
+      // Check for overlap-related errors from backend
+      if (errorMessage.includes('unavailable') || 
+          errorMessage.includes('conflict') || 
+          errorMessage.includes('overlap') ||
+          errorMessage.includes('maintenance') ||
+          errorMessage.includes('scheduled') ||
+          errorMessage.includes('active')) {
+        setErrorMessage(`Schedule conflict: ${errorMessage}`);
+      } else {
+        setErrorMessage(`Failed to create maintenance order: ${errorMessage}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -267,6 +277,9 @@ export function AddMaintenanceOrder() {
               {availableVehicles.length === 0 && (
                 <p className="mt-1 text-sm text-red-600">No vehicles available for maintenance</p>
               )}
+              <p className="mt-1 text-sm text-gray-500">
+                The backend will validate schedule conflicts with existing maintenance orders
+              </p>
             </div>
 
             {/* Service Description */}
