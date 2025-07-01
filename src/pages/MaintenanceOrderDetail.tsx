@@ -37,6 +37,58 @@ function MaintenanceStatusBadge({ status }: { status: string }) {
   );
 }
 
+// Enhanced error parsing function
+function parseBackendError(error: Error): { type: 'validation' | 'conflict' | 'authorization' | 'network' | 'generic'; message: string } {
+  const errorMessage = error.message.toLowerCase();
+  
+  // Check for specific backend validation errors
+  if (errorMessage.includes('conflict') || 
+      errorMessage.includes('overlap') || 
+      errorMessage.includes('unavailable') ||
+      errorMessage.includes('already scheduled') ||
+      errorMessage.includes('maintenance period')) {
+    return {
+      type: 'conflict',
+      message: error.message
+    };
+  }
+  
+  if (errorMessage.includes('validation') || 
+      errorMessage.includes('invalid') || 
+      errorMessage.includes('required') ||
+      errorMessage.includes('missing')) {
+    return {
+      type: 'validation',
+      message: error.message
+    };
+  }
+  
+  if (errorMessage.includes('authorization') || 
+      errorMessage.includes('permission') || 
+      errorMessage.includes('access denied') ||
+      errorMessage.includes('unauthorized')) {
+    return {
+      type: 'authorization',
+      message: error.message
+    };
+  }
+  
+  if (errorMessage.includes('network') || 
+      errorMessage.includes('connection') || 
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('fetch')) {
+    return {
+      type: 'network',
+      message: 'Network error. Please check your connection and try again.'
+    };
+  }
+  
+  return {
+    type: 'generic',
+    message: error.message
+  };
+}
+
 export function MaintenanceOrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -47,6 +99,7 @@ export function MaintenanceOrderDetail() {
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorType, setErrorType] = useState<'validation' | 'conflict' | 'authorization' | 'network' | 'generic'>('generic');
 
   // Auto-clear messages after 5 seconds
   useEffect(() => {
@@ -54,6 +107,7 @@ export function MaintenanceOrderDetail() {
       const timer = setTimeout(() => {
         setSuccessMessage('');
         setErrorMessage('');
+        setErrorType('generic');
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -64,6 +118,7 @@ export function MaintenanceOrderDetail() {
 
     setIsAuthorizing(true);
     setErrorMessage('');
+    setErrorType('generic');
 
     try {
       // Update maintenance order status and details via API service
@@ -84,11 +139,28 @@ export function MaintenanceOrderDetail() {
 
     } catch (error) {
       console.error('Error authorizing maintenance order:', error);
-      setErrorMessage(
-        error instanceof Error 
-          ? `Failed to authorize maintenance order: ${error.message}`
-          : 'Failed to authorize maintenance order. Please try again.'
-      );
+      
+      // Enhanced error handling with specific error types
+      const parsedError = parseBackendError(error as Error);
+      setErrorType(parsedError.type);
+      
+      // Set user-friendly error messages based on error type
+      switch (parsedError.type) {
+        case 'conflict':
+          setErrorMessage(`Schedule Conflict: ${parsedError.message}`);
+          break;
+        case 'validation':
+          setErrorMessage(`Validation Error: ${parsedError.message}`);
+          break;
+        case 'authorization':
+          setErrorMessage(`Authorization Error: ${parsedError.message}`);
+          break;
+        case 'network':
+          setErrorMessage(parsedError.message);
+          break;
+        default:
+          setErrorMessage(`Failed to authorize maintenance order: ${parsedError.message}`);
+      }
     } finally {
       setIsAuthorizing(false);
     }
@@ -99,6 +171,7 @@ export function MaintenanceOrderDetail() {
       setSuccessMessage('');
     } else {
       setErrorMessage('');
+      setErrorType('generic');
     }
   };
 
@@ -130,16 +203,6 @@ export function MaintenanceOrderDetail() {
     ? data.drivers.find(d => d.id === vehicle.assignedDriverId)
     : null;
 
-  // DEBUG LOGS - Added here to inspect values
-  console.log('=== DEBUG LOGS FOR MAINTENANCE ORDER DETAIL ===');
-  console.log('user object:', user);
-  console.log('user?.isAdmin:', user?.isAdmin);
-  console.log('order object:', order);
-  console.log('order?.status:', order?.status);
-  console.log('Combined condition (user?.isAdmin && order?.status === "pending_authorization"):', 
-    user?.isAdmin && order?.status === 'pending_authorization');
-  console.log('=== END DEBUG LOGS ===');
-
   if (!order) {
     return (
       <div className="text-center py-12">
@@ -153,6 +216,37 @@ export function MaintenanceOrderDetail() {
       </div>
     );
   }
+
+  // Enhanced error message styling based on error type
+  const getErrorMessageStyling = (type: string) => {
+    switch (type) {
+      case 'conflict':
+        return 'bg-orange-50 border-orange-200 text-orange-800';
+      case 'validation':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      case 'authorization':
+        return 'bg-purple-50 border-purple-200 text-purple-800';
+      case 'network':
+        return 'bg-blue-50 border-blue-200 text-blue-800';
+      default:
+        return 'bg-red-50 border-red-200 text-red-800';
+    }
+  };
+
+  const getErrorIcon = (type: string) => {
+    switch (type) {
+      case 'conflict':
+        return <AlertTriangle className="h-5 w-5 text-orange-400" />;
+      case 'validation':
+        return <AlertTriangle className="h-5 w-5 text-yellow-400" />;
+      case 'authorization':
+        return <AlertTriangle className="h-5 w-5 text-purple-400" />;
+      case 'network':
+        return <AlertTriangle className="h-5 w-5 text-blue-400" />;
+      default:
+        return <AlertTriangle className="h-5 w-5 text-red-400" />;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -178,21 +272,54 @@ export function MaintenanceOrderDetail() {
         </div>
       )}
 
-      {/* Error Message */}
+      {/* Enhanced Error Message with Type-specific Styling */}
       {errorMessage && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 transition-all duration-300">
+        <div className={`rounded-md border p-4 transition-all duration-300 ${getErrorMessageStyling(errorType)}`}>
           <div className="flex items-center justify-between">
             <div className="flex">
               <div className="flex-shrink-0">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+                {getErrorIcon(errorType)}
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">{errorMessage}</p>
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm font-medium">{errorMessage}</p>
+                  {errorType === 'conflict' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                      Schedule Conflict
+                    </span>
+                  )}
+                  {errorType === 'validation' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Validation Error
+                    </span>
+                  )}
+                  {errorType === 'authorization' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                      Authorization Error
+                    </span>
+                  )}
+                  {errorType === 'network' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      Network Error
+                    </span>
+                  )}
+                </div>
+                {/* Additional context for specific error types */}
+                {errorType === 'conflict' && (
+                  <p className="text-xs mt-1 opacity-75">
+                    This maintenance order conflicts with existing schedules. Please check the vehicle's current assignments.
+                  </p>
+                )}
+                {errorType === 'network' && (
+                  <p className="text-xs mt-1 opacity-75">
+                    Please check your internet connection and try again. If the problem persists, contact support.
+                  </p>
+                )}
               </div>
             </div>
             <button
               onClick={() => dismissMessage('error')}
-              className="text-red-400 hover:text-red-600 transition-colors duration-200"
+              className="transition-colors duration-200 hover:opacity-75"
             >
               <X className="h-4 w-4" />
             </button>
