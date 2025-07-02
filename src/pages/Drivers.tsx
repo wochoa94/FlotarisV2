@@ -283,14 +283,8 @@ export function Drivers() {
                       {renderSortIcon('idNumber')}
                     </div>
                   </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setSorting('assignedVehicles')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Assigned Vehicles</span>
-                      {renderSortIcon('assignedVehicles')}
-                    </div>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assigned Vehicle
                   </th>
                   <th 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
@@ -333,16 +327,18 @@ export function Drivers() {
                       {driver.idNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {(driver.assignedVehiclesCount || 0) > 0 ? (
-                        <Link
-                          to={`/drivers/${driver.id}`}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors duration-200"
-                        >
-                          {driver.assignedVehiclesCount} vehicle{driver.assignedVehiclesCount !== 1 ? 's' : ''}
-                        </Link>
+                      {driver.assignedVehicle ? (
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {driver.assignedVehicle.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {driver.assignedVehicle.licensePlate || 'No plate'}
+                          </div>
+                        </div>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          No vehicles
+                          Unassigned
                         </span>
                       )}
                     </td>

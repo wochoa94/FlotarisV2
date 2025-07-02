@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Driver, DriverQueryParams, PaginatedDriversResponse } from '../types';
 import { driverService } from '../services/apiService';
 
-type SortColumn = 'name' | 'email' | 'idNumber' | 'assignedVehicles' | 'createdAt';
+type SortColumn = 'name' | 'email' | 'idNumber' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
 
 interface UseDriversDataReturn {
