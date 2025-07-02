@@ -1,4 +1,4 @@
-import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, VehicleQueryParams, PaginatedVehiclesResponse } from '../types';
+import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, VehicleQueryParams, PaginatedVehiclesResponse, DriverQueryParams, PaginatedDriversResponse } from '../types';
 
 // IMPORTANT: Replace this with the actual URL of your running backend service.
 // For local development, it might be something like 'http://localhost:3000'
@@ -152,6 +152,39 @@ export const driverService = {
       console.error('Error checking email uniqueness:', error);
       return false;
     }
+  },
+
+  // New method for paginated drivers with filtering and sorting
+  async fetchPaginatedDrivers(params: DriverQueryParams = {}): Promise<PaginatedDriversResponse> {
+    const queryParams = new URLSearchParams();
+
+    // Add search parameters
+    if (params.search) {
+      queryParams.append('search', params.search);
+    }
+    if (params.emailSearch) {
+      queryParams.append('emailSearch', params.emailSearch);
+    }
+
+    // Add sorting parameters
+    if (params.sortBy) {
+      queryParams.append('sortBy', params.sortBy);
+    }
+    if (params.sortOrder) {
+      queryParams.append('sortOrder', params.sortOrder);
+    }
+
+    // Add pagination parameters
+    if (params.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.limit) {
+      queryParams.append('limit', params.limit.toString());
+    }
+
+    const endpoint = `/drivers/paginated${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiCall(endpoint);
+    return response;
   },
 };
 

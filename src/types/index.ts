@@ -6,6 +6,7 @@ export interface Driver {
   address: string | null;
   idNumber: string;
   userId: string | null;
+  assignedVehiclesCount?: number; // Added for paginated response
   createdAt: string;
   updatedAt: string;
 }
@@ -87,6 +88,25 @@ export interface VehicleQueryParams {
 
 export interface PaginatedVehiclesResponse {
   vehicles: Vehicle[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// New types for advanced driver data management
+export interface DriverQueryParams {
+  search?: string;
+  emailSearch?: string;
+  sortBy?: 'name' | 'email' | 'idNumber' | 'assignedVehicles' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedDriversResponse {
+  drivers: Driver[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
