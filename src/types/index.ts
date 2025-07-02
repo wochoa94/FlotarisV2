@@ -74,6 +74,26 @@ export interface FleetData {
   vehicleSchedules: VehicleSchedule[];
 }
 
+// New types for advanced vehicle data management
+export interface VehicleQueryParams {
+  search?: string;
+  status?: string[];
+  unassignedOnly?: boolean;
+  sortBy?: 'name' | 'status' | 'mileage' | 'maintenanceCost' | 'assignedDriver';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedVehiclesResponse {
+  vehicles: Vehicle[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 // Gantt Chart Types
 export type GanttItemType = 'schedule' | 'maintenance';
 
