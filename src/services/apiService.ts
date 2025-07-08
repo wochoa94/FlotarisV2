@@ -1,4 +1,4 @@
-import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, VehicleQueryParams, PaginatedVehiclesResponse, DriverQueryParams, PaginatedDriversResponse } from '../types';
+import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, VehicleQueryParams, PaginatedVehiclesResponse, DriverQueryParams, PaginatedDriversResponse, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse } from '../types';
 
 // IMPORTANT: Replace this with the actual URL of your running backend service.
 // For local development, it might be something like 'http://localhost:3000'
@@ -296,6 +296,41 @@ export const maintenanceOrderService = {
       method: 'PATCH',
       body: JSON.stringify(updateData),
     });
+    return response;
+  },
+
+  // New method for paginated maintenance orders with filtering and sorting
+  async fetchPaginatedMaintenanceOrders(params: MaintenanceOrderQueryParams = {}): Promise<PaginatedMaintenanceOrdersResponse> {
+    const queryParams = new URLSearchParams();
+
+    // Add search parameter
+    if (params.search) {
+      queryParams.append('search', params.search);
+    }
+
+    // Add status filters
+    if (params.status && params.status.length > 0) {
+      params.status.forEach(status => queryParams.append('status', status));
+    }
+
+    // Add sorting parameters
+    if (params.sortBy) {
+      queryParams.append('sortBy', params.sortBy);
+    }
+    if (params.sortOrder) {
+      queryParams.append('sortOrder', params.sortOrder);
+    }
+
+    // Add pagination parameters
+    if (params.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.limit) {
+      queryParams.append('limit', params.limit.toString());
+    }
+
+    const endpoint = `/maintenance-orders/paginated${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiCall(endpoint);
     return response;
   },
 };
