@@ -141,6 +141,25 @@ export interface PaginatedMaintenanceOrdersResponse {
   hasPreviousPage: boolean;
 }
 
+// New types for vehicle schedules pagination
+export interface VehicleScheduleQueryParams {
+  search?: string;
+  status?: string[];
+  sortBy?: 'vehicleName' | 'driverName' | 'startDate' | 'endDate' | 'duration' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedVehicleSchedulesResponse {
+  vehicleSchedules: VehicleSchedule[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 // Gantt Chart Types
 export type GanttItemType = 'schedule' | 'maintenance';
 
