@@ -332,7 +332,7 @@ export function Vehicles() {
                       ${vehicle.maintenanceCost?.toLocaleString() || '0'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getDriverName(vehicle.assignedDriverId)}
+                      {getDriverName(vehicle)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
