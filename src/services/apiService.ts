@@ -3,7 +3,7 @@ import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, Ve
 // IMPORTANT: Replace this with the actual URL of your running backend service.
 // For local development, it might be something like 'http://localhost:3000'
 // or the port your Node.js backend is listening on.
-const BASE_URL = 'http://localhost:3000/api'; // Assuming a common /api prefix
+const BASE_URL = 'https://flotaris-backend.onrender.com'; // Assuming a common /api prefix
 
 // Helper function to handle API calls
 async function apiCall(endpoint: string, options: RequestInit = {}): Promise<any> {
