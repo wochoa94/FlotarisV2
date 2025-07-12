@@ -55,7 +55,12 @@ export function SchedulesOverview() {
       title: order.orderNumber,
       startDate: order.startDate,
       endDate: order.estimatedCompletionDate,
-      color: order.status === 'completed' ? '#808080' : '#FFC107', // Grey for completed, amber for others
+      color:
+        order.status === 'completed'
+          ? '#808080' // Grey for completed
+          : order.status === 'pending_authorization'
+          ? '#FFFDE7' // Pale yellow for pending authorization
+          : '#FFC107', // Amber for scheduled, active, or any other non-completed status
       details: {
         orderNumber: order.orderNumber,
         description: order.description || undefined,
@@ -196,7 +201,11 @@ export function SchedulesOverview() {
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 bg-amber-500 rounded"></div>
-            <span className="text-sm text-gray-700">Maintenance Orders</span>
+            <span className="text-sm text-gray-700">Scheduled/Active Maintenance</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-yellow-50 rounded border border-gray-300"></div>
+            <span className="text-sm text-gray-700">Pending Authorization Maintenance</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 bg-gray-500 rounded"></div>
