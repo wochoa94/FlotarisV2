@@ -35,6 +35,8 @@ export interface Vehicle {
   maintenanceCost: number | null;
   assignedDriverId: string | null;
   userId?: string | null;
+  assignedDriverName?: string | null;
+  assignedDriverEmail?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -39,12 +39,6 @@ export function Vehicles() {
     refreshData,
   } = useVehiclesData();
 
-  // Get driver name from the vehicle data (backend already includes assignedDriverName)
-  const getDriverName = (vehicle: any): string => {
-    if (!vehicle.assignedDriverId) return 'Unassigned';
-    return vehicle.assignedDriverName || 'Unknown Driver';
-  };
-
   // Render sort icon
   const renderSortIcon = (column: string) => {
     if (sortBy !== column) {
@@ -331,8 +325,21 @@ export function Vehicles() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ${vehicle.maintenanceCost?.toLocaleString() || '0'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getDriverName(vehicle)}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {vehicle.assignedDriverName ? (
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {vehicle.assignedDriverName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {vehicle.assignedDriverEmail || 'No email'}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Unassigned
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
