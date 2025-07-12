@@ -94,9 +94,6 @@ export function VehicleDetail() {
   }
 
   const vehicle = data.vehicles.find(v => v.id === id);
-  const assignedDriver = vehicle?.assignedDriverId 
-    ? data.drivers.find(d => d.id === vehicle.assignedDriverId)
-    : null;
 
   if (!vehicle) {
     return (
@@ -261,12 +258,12 @@ export function VehicleDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Assigned Driver</dt>
                   <dd className="text-sm font-medium text-gray-900">
-                    {assignedDriver ? (
+                    {vehicle.assignedDriverName ? (
                       <Link 
-                        to={`/drivers/${assignedDriver.id}`}
+                        to={`/drivers/${vehicle.assignedDriverId}`}
                         className="text-blue-600 hover:text-blue-700"
                       >
-                        {assignedDriver.name}
+                        {vehicle.assignedDriverName}
                       </Link>
                     ) : (
                       'Unassigned'
@@ -400,7 +397,7 @@ export function VehicleDetail() {
       </div>
 
       {/* Assigned Driver Details */}
-      {assignedDriver && (
+      {vehicle.assignedDriverName && vehicle.assignedDriverId && (
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -413,13 +410,13 @@ export function VehicleDetail() {
                   <User className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900">{assignedDriver.name}</h4>
-                  <p className="text-sm text-gray-500">{assignedDriver.email}</p>
-                  <p className="text-sm text-gray-500">ID: {assignedDriver.idNumber}</p>
+                  <h4 className="text-lg font-medium text-gray-900">{vehicle.assignedDriverName}</h4>
+                  <p className="text-sm text-gray-500">{vehicle.assignedDriverEmail || 'No email'}</p>
+                  <p className="text-sm text-gray-500">Driver ID: {vehicle.assignedDriverId}</p>
                 </div>
               </div>
               <Link
-                to={`/drivers/${assignedDriver.id}`}
+                to={`/drivers/${vehicle.assignedDriverId}`}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 View Driver Details
