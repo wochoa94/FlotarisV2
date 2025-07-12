@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { maintenanceOrderService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AuthorizeMaintenanceOrderModal } from '../components/modals/AuthorizeMaintenanceOrderModal';
+import { formatDate } from '../utils/dateUtils';
 
 // Status badge component for maintenance orders
 function MaintenanceStatusBadge({ status }: { status: string }) {
@@ -406,7 +407,7 @@ export function MaintenanceOrderDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Start Date</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {new Date(order.startDate).toLocaleDateString()}
+                    {formatDate(order.startDate)}
                   </dd>
                 </dl>
               </div>
@@ -424,7 +425,7 @@ export function MaintenanceOrderDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Est. Completion</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {new Date(order.estimatedCompletionDate).toLocaleDateString()}
+                    {formatDate(order.estimatedCompletionDate)}
                   </dd>
                 </dl>
               </div>
@@ -477,13 +478,13 @@ export function MaintenanceOrderDetail() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Start Date</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(order.startDate).toLocaleDateString()}
+                  {formatDate(order.startDate)}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Estimated Completion Date</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(order.estimatedCompletionDate).toLocaleDateString()}
+                  {formatDate(order.estimatedCompletionDate)}
                 </dd>
               </div>
               <div>
@@ -525,7 +526,7 @@ export function MaintenanceOrderDetail() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Created</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {formatDate(order.createdAt)}
                 </dd>
               </div>
             </dl>

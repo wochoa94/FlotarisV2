@@ -5,6 +5,7 @@ import { useFleetData } from '../hooks/useFleetData';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Vehicle } from '../types';
+import { formatDate } from '../utils/dateUtils';
 
 export function Dashboard() {
   const { data, loading, error } = useFleetData();
@@ -190,7 +191,7 @@ export function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500">
-                        {vehicle.nextMaintenance && new Date(vehicle.nextMaintenance).toLocaleDateString()}
+                        {vehicle.nextMaintenance && formatDate(vehicle.nextMaintenance)}
                       </p>
                     </div>
                   </div>
@@ -271,7 +272,7 @@ export function Dashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {vehicle.nextMaintenance 
-                          ? new Date(vehicle.nextMaintenance).toLocaleDateString()
+                          ? formatDate(vehicle.nextMaintenance)
                           : 'Not scheduled'
                         }
                       </td>

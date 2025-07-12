@@ -5,6 +5,7 @@ import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { formatTooltipDate, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
+import { formatDate } from '../utils/dateUtils';
 
 // Status badge component for vehicle schedules (copied from VehicleSchedules.tsx)
 function ScheduleStatusBadge({ status }: { status: string }) {
@@ -163,7 +164,7 @@ export function DriverDetail() {
                 )}
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Driver since {new Date(driver.createdAt).toLocaleDateString()}
+                  Driver since {formatDate(driver.createdAt)}
                 </div>
               </div>
             </div>
@@ -206,7 +207,7 @@ export function DriverDetail() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Created</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(driver.createdAt).toLocaleDateString()}
+                  {formatDate(driver.createdAt)}
                 </dd>
               </div>
             </dl>

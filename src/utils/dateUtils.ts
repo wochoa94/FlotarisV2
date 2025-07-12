@@ -8,6 +8,7 @@ import { addDays, format, differenceInDays, startOfDay, endOfDay } from 'date-fn
 /**
  * Formats a date string for display
  * Handles both YYYY-MM-DD strings (from date type columns) and ISO timestamp strings
+ * Ensures UTC dates are displayed as the intended local day.
  * @param dateString - Date string (YYYY-MM-DD or ISO format)
  * @returns Formatted date string
  */
@@ -23,8 +24,10 @@ export function formatDate(dateString: string): string {
     });
   }
   
-  // For ISO timestamp strings, use standard Date parsing
-  return new Date(dateString).toLocaleDateString('en-US', {
+  // For ISO timestamp strings, parse as UTC and then construct a local date for display
+  const date = new Date(dateString);
+  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  return localDateFromUTC.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -94,6 +97,7 @@ export function formatGanttDate(date: Date): string {
 /**
  * Formats a date for display in tooltips
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * Ensures UTC dates are displayed as the intended local day.
  * @param dateString - Date string
  * @returns Formatted date string
  */
@@ -105,8 +109,10 @@ export function formatTooltipDate(dateString: string): string {
     return format(date, 'MMM dd, yyyy');
   }
   
-  // For ISO timestamp strings, use standard Date parsing
-  return format(new Date(dateString), 'MMM dd, yyyy');
+  // For ISO timestamp strings, parse as UTC and then construct a local date for display
+  const date = new Date(dateString);
+  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  return format(localDateFromUTC, 'MMM dd, yyyy');
 }
 
 /**
@@ -122,6 +128,7 @@ export function isToday(date: Date): boolean {
 /**
  * Converts a date string to a Date object at start of day
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * Ensures UTC dates are parsed to the intended local day.
  * @param dateString - Date string
  * @returns Date object
  */
@@ -132,13 +139,15 @@ export function parseDate(dateString: string): Date {
     return startOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
   }
   
-  // For ISO timestamp strings, use standard Date parsing
-  return startOfDay(new Date(dateString));
+  // For ISO timestamp strings, parse as UTC and then construct a local date for calculations
+  const date = new Date(dateString);
+  return startOfDay(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 /**
  * Converts a date string to a Date object at end of day
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
+ * Ensures UTC dates are parsed to the intended local day.
  * @param dateString - Date string
  * @returns Date object
  */
@@ -149,17 +158,21 @@ export function parseDateEnd(dateString: string): Date {
     return endOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
   }
   
-  // For ISO timestamp strings, use standard Date parsing
-  return endOfDay(new Date(dateString));
+  // For ISO timestamp strings, parse as UTC and then construct a local date for calculations
+  const date = new Date(dateString);
+  return endOfDay(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 /**
  * Formats a UTC date string to local YYYY-MM-DD for date inputs
+ * Ensures UTC dates are displayed as the intended local day for input fields.
  * @param utcDateString - UTC ISO date string
  * @returns Local YYYY-MM-DD string
  */
 export function formatUtcDateForInput(utcDateString: string): string {
-  return format(new Date(utcDateString), 'yyyy-MM-dd');
+  const date = new Date(utcDateString);
+  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  return format(localDateFromUTC, 'yyyy-MM-dd');
 }
 
 /**

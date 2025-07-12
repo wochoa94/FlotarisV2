@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { vehicleService } from '../services/apiService';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { formatDate } from '../utils/dateUtils';
 
 export function VehicleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -314,7 +315,7 @@ export function VehicleDetail() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Created</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(vehicle.createdAt).toLocaleDateString()}
+                  {formatDate(vehicle.createdAt)}
                 </dd>
               </div>
             </dl>
@@ -333,7 +334,7 @@ export function VehicleDetail() {
                 <dt className="text-sm font-medium text-gray-500">Last Maintenance</dt>
                 <dd className="mt-1 text-sm text-gray-900">
                   {vehicle.lastMaintenance 
-                    ? new Date(vehicle.lastMaintenance).toLocaleDateString()
+                    ? formatDate(vehicle.lastMaintenance)
                     : 'Never'
                   }
                 </dd>
@@ -342,7 +343,7 @@ export function VehicleDetail() {
                 <dt className="text-sm font-medium text-gray-500">Next Maintenance</dt>
                 <dd className="mt-1 text-sm text-gray-900">
                   {vehicle.nextMaintenance 
-                    ? new Date(vehicle.nextMaintenance).toLocaleDateString()
+                    ? formatDate(vehicle.nextMaintenance)
                     : 'Not scheduled'
                   }
                 </dd>

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useMaintenanceOrdersData } from '../hooks/useMaintenanceOrdersData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { MaintenanceOrder } from '../types';
+import { formatDate } from '../utils/dateUtils';
 
 // Status badge component for maintenance orders
 function MaintenanceStatusBadge({ status }: { status: MaintenanceOrder['status'] }) {
@@ -438,10 +439,10 @@ export function MaintenanceOrders() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(order.startDate).toLocaleDateString()}
+                      {formatDate(order.startDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(order.estimatedCompletionDate).toLocaleDateString()}
+                      {formatDate(order.estimatedCompletionDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.cost ? `$${order.cost.toLocaleString()}` : 'N/A'}
