@@ -39,12 +39,10 @@ export function Vehicles() {
     refreshData,
   } = useVehiclesData();
 
-  // Get driver name by ID (fallback for vehicles without assigned drivers)
-  const getDriverName = (driverId: string | null): string => {
-    if (!driverId) return 'Unassigned';
-    // Note: In a real implementation, you might need to fetch driver data
-    // For now, we'll show the driver ID or implement a separate driver lookup
-    return `Driver ${driverId.slice(0, 8)}...`;
+  // Get driver name from the vehicle data (backend already includes assignedDriverName)
+  const getDriverName = (vehicle: any): string => {
+    if (!vehicle.assignedDriverId) return 'Unassigned';
+    return vehicle.assignedDriverName || 'Unknown Driver';
   };
 
   // Render sort icon
