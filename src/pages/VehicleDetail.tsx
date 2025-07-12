@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Calendar, Gauge, DollarSign, User, Settings, Trash2, X, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useFleetData } from '../hooks/useFleetData';
+import { useVehicleDetails } from '../hooks/useVehicleDetails';
 import { useAuth } from '../hooks/useAuth';
 import { vehicleService } from '../services/apiService';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -10,7 +10,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 export function VehicleDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, loading, error, refreshData } = useFleetData();
+  const { vehicle, loading, error, refreshVehicle } = useVehicleDetails(id);
   const { user } = useAuth();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -42,8 +42,8 @@ export function VehicleDetail() {
       // Success feedback
       setSuccessMessage('Vehicle deleted successfully!');
       
-      // Refresh fleet data
-      await refreshData();
+      // Refresh vehicle data
+      await refreshVehicle();
       
       // Close modal and redirect after a short delay
       setShowDeleteModal(false);
@@ -92,8 +92,6 @@ export function VehicleDetail() {
       </div>
     );
   }
-
-  const vehicle = data.vehicles.find(v => v.id === id);
 
   if (!vehicle) {
     return (
@@ -258,7 +256,7 @@ export function VehicleDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Assigned Driver</dt>
                   <dd className="text-sm font-medium text-gray-900">
-                    {vehicle.assignedDriverName ? (
+                    {vehicle?.assignedDriverName ? (
                       <Link 
                         to={`/drivers/${vehicle.assignedDriverId}`}
                         className="text-blue-600 hover:text-blue-700"
