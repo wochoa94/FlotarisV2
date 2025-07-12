@@ -59,7 +59,7 @@ export function SchedulesOverview() {
         order.status === 'completed'
           ? '#808080' // Grey for completed
           : order.status === 'pending_authorization'
-          ? '#FFFDE7' // Pale yellow for pending authorization
+          ? '#FFFDE7' // Pale yellow for pending authorization (barely visible)
           : '#FFC107', // Amber for scheduled, active, or any other non-completed status
       details: {
         orderNumber: order.orderNumber,

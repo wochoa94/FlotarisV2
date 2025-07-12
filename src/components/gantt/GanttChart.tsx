@@ -215,18 +215,19 @@ export function GanttChart({
         </div>
 
         {/* Vehicle Rows Content */}
-        <div className="relative">
-          {vehicles.map((vehicle, vehicleIndex) => {
-            const vehicleItems = itemsByVehicle[vehicle.id] || [];
-            
-            return (
-              <div
-                key={vehicle.id}
+                    className={`absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                      isCompleted
+                        ? 'focus:ring-gray-500'
+                        : isSchedule
+                          ? 'focus:ring-blue-500'
+                          : 'focus:ring-amber-500'
+                    }`}
                 className="flex border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
                 style={{ height: ROW_HEIGHT }}
               >
                 {/* Vehicle Info Column - Sticky to left */}
-                <div 
+                      height: ITEM_HEIGHT,
+                      backgroundColor: item.color,
                   className="flex-shrink-0 border-r border-gray-200 bg-white sticky left-0 z-20 flex items-center"
                   style={{ width: VEHICLE_COLUMN_WIDTH }}
                 >
@@ -235,7 +236,9 @@ export function GanttChart({
                       <div className="flex-shrink-0">
                         <div className={`w-3 h-3 rounded-full ${
                           vehicle.status === 'active' ? 'bg-green-500' :
-                          vehicle.status === 'maintenance' ? 'bg-yellow-500' :
+                    <div className={`flex items-center h-full px-2 text-xs font-medium ${
+                      item.color === '#FFFDE7' ? 'text-gray-800' : 'text-white'
+                    }`}>
                           'bg-red-500'
                         }`} />
                       </div>
