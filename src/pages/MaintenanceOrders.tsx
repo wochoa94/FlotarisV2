@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Plus, Search, Filter, Wrench, Calendar, Clock, DollarSign, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
