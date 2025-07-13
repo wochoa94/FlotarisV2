@@ -148,13 +148,6 @@ export function useGanttChartData(
             location: order.location || undefined
           }
         };
-        details: {
-          orderNumber: order.orderNumber,
-          description: order.description || undefined,
-          status: order.status,
-          urgent: order.urgent || false,
-          location: order.location || undefined
-        };
       });
 
       // Combine all items
