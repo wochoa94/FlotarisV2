@@ -234,18 +234,13 @@ export function GanttChart({
                         return (
                           <div
                             key={item.id}
-                            className={`absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                              isCompleted
-                                ? 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-500'
-                                : isSchedule 
-                                  ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' 
-                                  : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
-                            }`}
+                            className="absolute rounded-md shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:opacity-90 hover:z-10 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
                             style={{
                               left: position.left,
                               width: position.width,
                               top: ITEM_MARGIN + (itemIndex % 2) * (ITEM_HEIGHT + ITEM_MARGIN),
-                              height: ITEM_HEIGHT
+                              height: ITEM_HEIGHT,
+                              backgroundColor: item.color
                             }}
                             onMouseEnter={(e) => handleItemMouseEnter(e, item)}
                             onMouseLeave={handleItemMouseLeave}
