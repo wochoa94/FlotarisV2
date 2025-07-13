@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar, Truck, Wrench, User, MapPin, FileText, AlertTriangle } from 'lucide-react';
+import { Calendar, Truck, Wrench, User, MapPin, FileText, AlertTriangle } from 'lucide-react';
 import { GanttItem, GanttVehicle } from '../../types';
 import { 
-  getToday, 
   addDaysToDate, 
   getDaysBetweenDates, 
   formatGanttDate, 
@@ -16,8 +15,8 @@ import {
 interface GanttChartProps {
   vehicles: GanttVehicle[];
   items: GanttItem[];
-  startDate?: Date;
-  daysToShow?: number;
+  startDate: Date;
+  daysToShow: number;
 }
 
 interface TooltipData {
@@ -35,40 +34,26 @@ const ITEM_MARGIN = 4;
 export function GanttChart({ 
   vehicles, 
   items, 
-  startDate = getToday(), 
-  daysToShow = 7 
+  startDate, 
+  daysToShow 
 }: GanttChartProps) {
-  const [currentStartDate, setCurrentStartDate] = useState(startDate);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Generate date range for the chart
   const dateRange = Array.from({ length: daysToShow }, (_, i) => 
-    addDaysToDate(currentStartDate, i)
+    addDaysToDate(startDate, i)
   );
 
   // Calculate total chart width
   const chartWidth = daysToShow * DAY_WIDTH_PX;
 
-  // Navigation functions
-  const goToPreviousWeek = () => {
-    setCurrentStartDate(addDaysToDate(currentStartDate, -7));
-  };
-
-  const goToNextWeek = () => {
-    setCurrentStartDate(addDaysToDate(currentStartDate, 7));
-  };
-
-  const goToToday = () => {
-    setCurrentStartDate(getToday());
-  };
-
   // Calculate item position and width
   const calculateItemPosition = (item: GanttItem) => {
     const itemStartDate = parseDate(item.startDate);
     const itemEndDate = parseDateEnd(item.endDate);
-    const chartStartDate = currentStartDate;
-    const chartEndDate = addDaysToDate(currentStartDate, daysToShow - 1);
+    const chartStartDate = startDate;
+    const chartEndDate = addDaysToDate(startDate, daysToShow - 1);
 
     // Check if item is visible in current date range
     if (itemEndDate < chartStartDate || itemStartDate > chartEndDate) {
@@ -130,47 +115,9 @@ export function GanttChart({
         scrollContainerRef.current.scrollLeft = scrollPosition;
       }
     }
-  }, [currentStartDate]);
+  }, [startDate]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-4">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <Calendar className="h-5 w-5 mr-2 text-blue-600" />
-            Schedule Timeline
-          </h3>
-          <div className="text-sm text-gray-600">
-            {format(currentStartDate, 'MMM dd')} - {format(addDaysToDate(currentStartDate, daysToShow - 1), 'MMM dd, yyyy')}
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={goToPreviousWeek}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-            title="Previous week"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          
-          <button
-            onClick={goToToday}
-            className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-200"
-          >
-            Today
-          </button>
-          
-          <button
-            onClick={goToNextWeek}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-            title="Next week"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
 
       {/* Main Gantt Chart Container with Scrolling */}
       <div 

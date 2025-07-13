@@ -128,6 +128,8 @@ export interface PaginatedDriversResponse {
 export interface MaintenanceOrderQueryParams {
   search?: string;
   status?: string[];
+  startDate?: string; // YYYY-MM-DD format
+  endDate?: string;   // YYYY-MM-DD format
   sortBy?: 'orderNumber' | 'vehicleName' | 'startDate' | 'estimatedCompletionDate' | 'cost' | 'status';
   sortOrder?: 'asc' | 'desc';
   page?: number;
@@ -147,6 +149,8 @@ export interface PaginatedMaintenanceOrdersResponse {
 export interface VehicleScheduleQueryParams {
   search?: string;
   status?: string[];
+  startDate?: string; // YYYY-MM-DD format
+  endDate?: string;   // YYYY-MM-DD format
   sortBy?: 'vehicleName' | 'driverName' | 'startDate' | 'endDate' | 'duration' | 'status';
   sortOrder?: 'asc' | 'desc';
   page?: number;

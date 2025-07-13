@@ -1,107 +1,77 @@
-import React, { useMemo } from 'react';
-import { Calendar, TrendingUp, Truck, Wrench, AlertTriangle } from 'lucide-react';
-import { useFleetData } from '../hooks/useFleetData';
+import React, { useState, useEffect } from 'react';
+import { Calendar, TrendingUp, Truck, Wrench, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useGanttChartData } from '../hooks/useGanttChartData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { GanttChart } from '../components/gantt/GanttChart';
-import { GanttItem, GanttVehicle } from '../types';
-import { getToday, addDaysToDate } from '../utils/dateUtils';
+import { getToday, addDaysToDate, formatGanttDate } from '../utils/dateUtils';
+import { format } from 'date-fns';
 
 export function SchedulesOverview() {
-  const { data, loading, error } = useFleetData();
+  // Date control state
+  const [currentStartDate, setCurrentStartDate] = useState(getToday());
+  const [daysToShow, setDaysToShow] = useState(7);
 
-  // Transform fleet data into Gantt chart format
-  const { ganttVehicles, ganttItems, stats } = useMemo(() => {
-    if (!data) {
-      return { ganttVehicles: [], ganttItems: [], stats: { totalItems: 0, activeSchedules: 0, activeMaintenance: 0, urgentItems: 0 } };
+  // Fetch Gantt chart data using the dedicated hook
+  const { ganttVehicles, ganttItems, stats, loading, error, refreshGanttData } = useGanttChartData(
+    currentStartDate,
+    daysToShow
+  );
+
+  // Refresh data when component mounts
+  useEffect(() => {
+    refreshGanttData();
+  }, [refreshGanttData]);
+
+  // Date navigation functions
+  const goToPreviousWeek = () => {
+    setCurrentStartDate(addDaysToDate(currentStartDate, -7));
+  };
+
+  const goToNextWeek = () => {
+    setCurrentStartDate(addDaysToDate(currentStartDate, 7));
+  };
+
+  const goToToday = () => {
+    setCurrentStartDate(getToday());
+  };
+
+  // Handle manual date selection
+  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(event.target.value);
+    if (!isNaN(newDate.getTime())) {
+      setCurrentStartDate(newDate);
     }
+  };
 
-    const { vehicles, drivers, maintenanceOrders, vehicleSchedules } = data;
-
-    // Transform vehicles for Gantt chart
-    const ganttVehicles: GanttVehicle[] = vehicles.map(vehicle => ({
-      id: vehicle.id,
-      name: vehicle.name,
-      make: vehicle.make,
-      model: vehicle.model,
-      year: vehicle.year,
-      status: vehicle.status
-    }));
-
-    // Transform vehicle schedules into Gantt items (include ALL schedules, including completed)
-    const scheduleItems: GanttItem[] = vehicleSchedules.map(schedule => {
-      const driver = drivers.find(d => d.id === schedule.driverId);
-      
-      return {
-        id: schedule.id,
-        vehicleId: schedule.vehicleId,
-        type: 'schedule' as const,
-        title: driver ? driver.name : 'Unknown Driver',
-        startDate: schedule.startDate,
-        endDate: schedule.endDate,
-        color: schedule.status === 'completed' ? '#808080' : '#1976D2', // Grey for completed, blue for others
-        details: {
-          driverName: driver?.name,
-          status: schedule.status,
-          notes: schedule.notes || undefined
-        }
-      };
-    });
-
-    // Transform maintenance orders into Gantt items (include ALL orders, including completed)
-    const maintenanceItems: GanttItem[] = maintenanceOrders.map(order => ({
-      id: order.id,
-      vehicleId: order.vehicleId,
-      type: 'maintenance' as const,
-      title: order.orderNumber,
-      startDate: order.startDate,
-      endDate: order.estimatedCompletionDate,
-      color:
-        order.status === 'completed'
-          ? '#808080' // Grey for completed
-          : order.status === 'pending_authorization'
-          ? '#FFFDE7' // Pale yellow for pending authorization (barely visible)
-          : '#FFC107', // Amber for scheduled, active, or any other non-completed status
-      details: {
-        orderNumber: order.orderNumber,
-        description: order.description || undefined,
-        status: order.status,
-        urgent: order.urgent || false,
-        location: order.location || undefined
-      }
-    }));
-
-    // Combine all items
-    const ganttItems = [...scheduleItems, ...maintenanceItems];
-
-    // Calculate statistics (only count non-completed items for active stats)
-    const stats = {
-      totalItems: ganttItems.length,
-      activeSchedules: scheduleItems.filter(item => item.details.status === 'active').length,
-      activeMaintenance: maintenanceItems.filter(item => item.details.status === 'active').length,
-      urgentItems: ganttItems.filter(item => item.details.urgent).length
-    };
-
-    return { ganttVehicles, ganttItems, stats };
-  }, [data]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  // Handle days to show selection
+  const handleDaysToShowChange = (newDaysToShow: number) => {
+    setDaysToShow(newDaysToShow);
+  };
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">{error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="text-blue-600 hover:text-blue-700"
-        >
-          Try again
-        </button>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Schedules Overview</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Interactive timeline view of vehicle schedules and maintenance orders
+          </p>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-red-800">
+              <h3 className="font-medium">Error loading schedules overview</h3>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
+            <button
+              onClick={refreshGanttData}
+              className="text-red-600 hover:text-red-700 transition-colors duration-200"
+            >
+              <AlertTriangle className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -114,6 +84,97 @@ export function SchedulesOverview() {
         <p className="mt-1 text-sm text-gray-600">
           Interactive timeline view of vehicle schedules and maintenance orders
         </p>
+      </div>
+
+      {/* Enhanced Date Range Controls */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            {/* Date Selection */}
+            <div>
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                value={format(currentStartDate, 'yyyy-MM-dd')}
+                onChange={handleStartDateChange}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+
+            {/* Days to Show Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                View Duration
+              </label>
+              <div className="flex space-x-2">
+                {[
+                  { value: 7, label: '1 Week' },
+                  { value: 14, label: '2 Weeks' },
+                  { value: 30, label: '1 Month' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleDaysToShowChange(option.value)}
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                      daysToShow === option.value
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Controls */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quick Navigation
+              </label>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={goToPreviousWeek}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  title="Previous week"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                
+                <button
+                  onClick={goToToday}
+                  className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                >
+                  Today
+                </button>
+                
+                <button
+                  onClick={goToNextWeek}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  title="Next week"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Current Range Display */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">Current Range:</span> {formatGanttDate(currentStartDate)} - {formatGanttDate(addDaysToDate(currentStartDate, daysToShow - 1))}
+              {loading && (
+                <span className="ml-4 inline-flex items-center">
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Loading data...
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Summary Statistics */}
@@ -234,30 +295,32 @@ export function SchedulesOverview() {
       <GanttChart
         vehicles={ganttVehicles}
         items={ganttItems}
-        startDate={getToday()}
-        daysToShow={7}
+        startDate={currentStartDate}
+        daysToShow={daysToShow}
       />
 
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-900 mb-2">How to use the timeline</h3>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Use the navigation arrows to move between weeks</li>
+          <li>• Use the date picker to jump to any specific date</li>
+          <li>• Select different view durations (1 Week, 2 Weeks, 1 Month)</li>
+          <li>• Use the navigation arrows to move between periods</li>
           <li>• Click "Today" to jump to the current date</li>
           <li>• Hover over schedule blocks to see detailed information</li>
           <li>• Use keyboard navigation (Tab and Enter) for accessibility</li>
-          <li>• Scroll horizontally to see more dates</li>
+          <li>• Scroll horizontally to see more dates within the selected range</li>
           <li>• Completed items are shown in grey for historical reference</li>
         </ul>
       </div>
 
       {/* Empty State */}
-      {ganttItems.length === 0 && (
+      {ganttItems.length === 0 && !loading && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
           <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No schedules or maintenance orders</h3>
           <p className="text-gray-500 mb-4">
-            There are currently no items to display in the timeline.
+            There are currently no items to display in the selected date range.
           </p>
           <div className="flex justify-center space-x-4">
             <a

@@ -313,6 +313,14 @@ export const maintenanceOrderService = {
       params.status.forEach(status => queryParams.append('status', status));
     }
 
+    // Add date range filters
+    if (params.startDate) {
+      queryParams.append('startDate', params.startDate);
+    }
+    if (params.endDate) {
+      queryParams.append('endDate', params.endDate);
+    }
+
     // Add sorting parameters
     if (params.sortBy) {
       queryParams.append('sortBy', params.sortBy);
@@ -388,6 +396,14 @@ export const vehicleScheduleService = {
     // Add status filters
     if (params.status && params.status.length > 0) {
       params.status.forEach(status => queryParams.append('status', status));
+    }
+
+    // Add date range filters
+    if (params.startDate) {
+      queryParams.append('startDate', params.startDate);
+    }
+    if (params.endDate) {
+      queryParams.append('endDate', params.endDate);
     }
 
     // Add sorting parameters
