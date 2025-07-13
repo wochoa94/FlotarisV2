@@ -83,6 +83,7 @@ export interface FleetData {
   drivers: Driver[];
   maintenanceOrders: MaintenanceOrder[];
   vehicleSchedules: VehicleSchedule[];
+  summary?: DashboardSummary;
 }
 
 // New types for advanced vehicle data management
@@ -195,4 +196,42 @@ export interface GanttVehicle {
   model: string | null;
   year: number | null;
   status: 'active' | 'maintenance' | 'idle';
+}
+
+// Dashboard Summary Types
+export interface MaintenanceOrderStatusCounts {
+  active: number;
+  scheduled: number;
+  pending_authorization: number;
+}
+
+export interface VehicleScheduleStatusCounts {
+  active: number;
+  scheduled: number;
+}
+
+export interface DashboardSummary {
+  totalVehicles: number;
+  totalDrivers: number;
+  activeVehiclesCount: number;
+  totalMaintenanceCost: number;
+  vehicleStatusCounts: {
+    active: number;
+    maintenance: number;
+    idle: number;
+  };
+  maintenanceOrdersStatusCounts: MaintenanceOrderStatusCounts;
+  vehicleSchedulesStatusCounts: VehicleScheduleStatusCounts;
+  highestMaintenanceCostVehicle: {
+    id: string;
+    name: string;
+    maintenanceCost: number;
+    licensePlate: string | null;
+  } | null;
+  lowestMaintenanceCostVehicle: {
+    id: string;
+    name: string;
+    maintenanceCost: number;
+    licensePlate: string | null;
+  } | null;
 }

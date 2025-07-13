@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Truck, Users, AlertTriangle, TrendingUp, Calendar, DollarSign } from 'lucide-react';
+import { Truck, Users, AlertTriangle, TrendingUp, Calendar, DollarSign, Wrench, Clock, Award, TrendingDown } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
-import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Vehicle } from '../types';
+import { VehicleStatusDonutChart } from '../components/charts/VehicleStatusDonutChart';
 import { formatDate } from '../utils/dateUtils';
 
 export function Dashboard() {
@@ -32,16 +31,20 @@ export function Dashboard() {
     );
   }
 
-  const { vehicles, drivers } = data;
+  const { vehicles, summary } = data;
+
+  // Use aggregated data from backend if available, otherwise fallback to client-side calculation
+  const totalVehicles = summary?.totalVehicles ?? vehicles.length;
+  const totalDrivers = summary?.totalDrivers ?? data.drivers.length;
+  const activeVehicles = summary?.activeVehiclesCount ?? vehicles.filter(v => v.status === 'active').length;
+  const totalMaintenanceCost = summary?.totalMaintenanceCost ?? vehicles.reduce((sum, v) => sum + (v.maintenanceCost || 0), 0);
   
-  // Calculate metrics
-  const activeVehicles = vehicles.filter(v => v.status === 'active').length;
-  const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance').length;
-  const idleVehicles = vehicles.filter(v => v.status === 'idle').length;
-  const totalMaintenanceCost = vehicles.reduce((sum, v) => sum + (v.maintenanceCost || 0), 0);
-  const averageMileage = vehicles.length > 0 
-    ? Math.round(vehicles.reduce((sum, v) => sum + (v.mileage || 0), 0) / vehicles.length)
-    : 0;
+  // Vehicle status counts for donut chart
+  const vehicleStatusCounts = summary?.vehicleStatusCounts ?? {
+    active: vehicles.filter(v => v.status === 'active').length,
+    maintenance: vehicles.filter(v => v.status === 'maintenance').length,
+    idle: vehicles.filter(v => v.status === 'idle').length,
+  };
 
   // Get vehicles needing maintenance soon (within 30 days)
   const upcomingMaintenance = vehicles.filter(v => {
@@ -55,7 +58,7 @@ export function Dashboard() {
   const stats = [
     {
       name: 'Total Vehicles',
-      value: vehicles.length,
+      value: totalVehicles,
       icon: Truck,
       color: 'bg-blue-500',
       href: '/vehicles',
@@ -68,7 +71,7 @@ export function Dashboard() {
     },
     {
       name: 'Total Drivers',
-      value: drivers.length,
+      value: totalDrivers,
       icon: Users,
       color: 'bg-purple-500',
       href: '/drivers',
@@ -130,41 +133,17 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Fleet Status Overview */}
+        {/* Fleet Status Donut Chart */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               Fleet Status Overview
             </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                  <span className="text-sm font-medium text-gray-900">Active</span>
-                </div>
-                <span className="text-sm text-gray-500">{activeVehicles} vehicles</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                  <span className="text-sm font-medium text-gray-900">Maintenance</span>
-                </div>
-                <span className="text-sm text-gray-500">{maintenanceVehicles} vehicles</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
-                  <span className="text-sm font-medium text-gray-900">Idle</span>
-                </div>
-                <span className="text-sm text-gray-500">{idleVehicles} vehicles</span>
-              </div>
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">Average Mileage</span>
-                  <span className="text-sm text-gray-500">{averageMileage.toLocaleString()} miles</span>
-                </div>
-              </div>
-            </div>
+            <VehicleStatusDonutChart
+              activeCount={vehicleStatusCounts.active}
+              maintenanceCount={vehicleStatusCounts.maintenance}
+              idleCount={vehicleStatusCounts.idle}
+            />
           </div>
         </div>
 
@@ -217,6 +196,145 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Enhanced Dashboard Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Maintenance Orders Status */}
+        {summary?.maintenanceOrdersStatusCounts && (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                <Wrench className="h-5 w-5 inline mr-2" />
+                Maintenance Orders Status
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <span className="text-sm font-medium text-gray-900">Active</span>
+                  </div>
+                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.active} orders</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <span className="text-sm font-medium text-gray-900">Scheduled</span>
+                  </div>
+                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.scheduled} orders</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                    <span className="text-sm font-medium text-gray-900">Pending Authorization</span>
+                  </div>
+                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.pending_authorization} orders</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Vehicle Schedules Status */}
+        {summary?.vehicleSchedulesStatusCounts && (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                <Calendar className="h-5 w-5 inline mr-2" />
+                Vehicle Schedules Status
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <span className="text-sm font-medium text-gray-900">Active</span>
+                  </div>
+                  <span className="text-sm text-gray-500">{summary.vehicleSchedulesStatusCounts.active} schedules</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <span className="text-sm font-medium text-gray-900">Scheduled</span>
+                  </div>
+                  <span className="text-sm text-gray-500">{summary.vehicleSchedulesStatusCounts.scheduled} schedules</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Maintenance Cost Leaders */}
+      {(summary?.highestMaintenanceCostVehicle || summary?.lowestMaintenanceCostVehicle) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Highest Maintenance Cost Vehicle */}
+          {summary?.highestMaintenanceCostVehicle && (
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                  <Award className="h-5 w-5 inline mr-2 text-red-500" />
+                  Highest Maintenance Cost
+                </h3>
+                <div className="bg-red-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-medium text-gray-900">{summary.highestMaintenanceCostVehicle.name}</h4>
+                      <p className="text-sm text-gray-600">
+                        License: {summary.highestMaintenanceCostVehicle.licensePlate || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-red-600">
+                        ${summary.highestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-500">Total Cost</div>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/vehicles/${summary.highestMaintenanceCostVehicle.id}`}
+                    className="mt-3 inline-flex items-center text-sm text-red-600 hover:text-red-700"
+                  >
+                    View Vehicle Details →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Lowest Maintenance Cost Vehicle */}
+          {summary?.lowestMaintenanceCostVehicle && (
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                  <TrendingDown className="h-5 w-5 inline mr-2 text-green-500" />
+                  Lowest Maintenance Cost
+                </h3>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-medium text-gray-900">{summary.lowestMaintenanceCostVehicle.name}</h4>
+                      <p className="text-sm text-gray-600">
+                        License: {summary.lowestMaintenanceCostVehicle.licensePlate || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-600">
+                        ${summary.lowestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-500">Total Cost</div>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/vehicles/${summary.lowestMaintenanceCostVehicle.id}`}
+                    className="mt-3 inline-flex items-center text-sm text-green-600 hover:text-green-700"
+                  >
+                    View Vehicle Details →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Recent Vehicles */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -265,7 +383,14 @@ export function Dashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge status={vehicle.status} />
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                          vehicle.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
+                          vehicle.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                          'bg-red-100 text-red-800 border-red-200'
+                        }`}>
+                          {vehicle.status === 'active' ? 'Active' : 
+                           vehicle.status === 'maintenance' ? 'Maintenance' : 'Idle'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {vehicle.mileage?.toLocaleString() || 'N/A'} miles

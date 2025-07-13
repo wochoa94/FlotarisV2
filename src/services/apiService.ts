@@ -68,6 +68,7 @@ export async function fetchFleetData(): Promise<FleetData> {
       drivers: data.drivers,
       maintenanceOrders: data.maintenanceOrders,
       vehicleSchedules: data.vehicleSchedules,
+      summary: data.summary, // New aggregated dashboard data
     };
 
     return fleetData;

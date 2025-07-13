@@ -13,7 +13,13 @@ interface FleetDataContextType {
 const FleetDataContext = createContext<FleetDataContextType | undefined>(undefined);
 
 export function FleetDataProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<FleetData>({ vehicles: [], drivers: [], maintenanceOrders: [], vehicleSchedules: [] });
+  const [data, setData] = useState<FleetData>({ 
+    vehicles: [], 
+    drivers: [], 
+    maintenanceOrders: [], 
+    vehicleSchedules: [],
+    summary: undefined
+  });
   const [loading, setLoading] = useState(true);
   const [isReconciling, setIsReconciling] = useState(false); // Simplified for API-based approach
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +39,8 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
         drivers: fleetData.drivers.length,
         vehicles: fleetData.vehicles.length,
         maintenanceOrders: fleetData.maintenanceOrders.length,
-        vehicleSchedules: fleetData.vehicleSchedules.length
+        vehicleSchedules: fleetData.vehicleSchedules.length,
+        summary: fleetData.summary ? 'Available' : 'Not available'
       });
 
       setData(fleetData);
