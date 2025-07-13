@@ -33,7 +33,24 @@ async function apiCall(endpoint: string, options: RequestInit = {}): Promise<any
       throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    // Handle responses that don't have JSON content (like 204 No Content for DELETE operations)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+
+    // Check if response has JSON content
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+
+    // Only parse JSON if we expect it to be there
+    const text = await response.text();
+    if (!text.trim()) {
+      return null;
+    }
+
+    return JSON.parse(text);
   } catch (error) {
     console.error(`API call failed for ${endpoint}:`, error);
     throw error;
