@@ -138,6 +138,11 @@ export function useGanttChartData(
         }
         
         return {
+          id: order.id,
+          vehicleId: order.vehicleId,
+          type: 'maintenance' as const,
+          title: order.orderNumber,
+          startDate: order.startDate,
           endDate: order.estimatedCompletionDate,
           color: maintenanceColor,
           details: {
