@@ -138,6 +138,7 @@ export function useGanttChartData(
         }
         
         return {
+        }
         id: order.id,
         vehicleId: order.vehicleId,
         type: 'maintenance' as const,
