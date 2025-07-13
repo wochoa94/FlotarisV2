@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, Edit, Plus, Search, User, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
+import { Eye, Edit, Plus, Search, Filter, User, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useDriversData } from '../hooks/useDriversData';
 import { driverService } from '../services/apiService';
@@ -8,6 +8,8 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export function Drivers() {
   const { user } = useAuth();
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
   const {
     // Data
     drivers,
@@ -62,6 +64,12 @@ export function Drivers() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // Enhanced clear all filters function that also closes the modal
+  const handleClearAllFilters = () => {
+    clearAllFilters();
+    setShowFilterModal(false);
   };
 
   // Render sort icon
@@ -140,76 +148,120 @@ export function Drivers() {
             Manage your fleet drivers
           </p>
         </div>
-        {user?.isAdmin && (
-          <Link
-            to="/drivers/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        <div className="flex items-center space-x-3">
+          {/* Filter Button */}
+          <button
+            onClick={() => setShowFilterModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Driver
-          </Link>
-        )}
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+            {(searchTerm || emailSearchTerm) && (
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Active
+              </span>
+            )}
+          </button>
+          
+          {/* Add Driver Button */}
+          {user?.isAdmin && (
+            <Link
+              to="/drivers/new"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Driver
+            </Link>
+          )}
+        </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Name Search */}
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Search by Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div className="px-4 py-5 sm:p-6">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <Filter className="h-5 w-5 text-gray-400 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Search & Filter Drivers</h3>
                 </div>
-                <input
-                  type="text"
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search by driver name..."
-                />
-              </div>
-            </div>
-            
-            {/* Email Search */}
-            <div>
-              <label htmlFor="emailSearch" className="block text-sm font-medium text-gray-700 mb-1">
-                Search by Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="emailSearch"
-                  value={emailSearchTerm}
-                  onChange={(e) => setEmailSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search by email address..."
-                />
-              </div>
-            </div>
-            
-            {/* Clear Filters */}
-            <div className="flex items-end">
-              {(searchTerm || emailSearchTerm) && (
                 <button
-                  onClick={clearAllFilters}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  onClick={() => setShowFilterModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Clear Filters
+                  <X className="h-6 w-6" />
                 </button>
-              )}
+              </div>
+
+              {/* Filter Content */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {/* Name Search */}
+                <div>
+                  <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                    Search by Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      id="search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      placeholder="Search by driver name..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Email Search */}
+                <div>
+                  <label htmlFor="emailSearch" className="block text-sm font-medium text-gray-700 mb-1">
+                    Search by Email
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      id="emailSearch"
+                      value={emailSearchTerm}
+                      onChange={(e) => setEmailSearchTerm(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      placeholder="Search by email address..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
+                <div>
+                  {(searchTerm || emailSearchTerm) && (
+                    <button
+                      onClick={handleClearAllFilters}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear All Filters
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Results Summary */}
       <div className="bg-white shadow rounded-lg">
@@ -388,7 +440,7 @@ export function Drivers() {
               </div>
               {!loading && (searchTerm || emailSearchTerm) && (
                 <button
-                  onClick={clearAllFilters}
+                  onClick={handleClearAllFilters}
                   className="text-blue-600 hover:text-blue-700 transition-colors duration-200"
                 >
                   Clear search filters
