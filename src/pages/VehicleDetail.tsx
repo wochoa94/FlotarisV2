@@ -43,9 +43,6 @@ export function VehicleDetail() {
       // Success feedback
       setSuccessMessage('Vehicle deleted successfully!');
       
-      // Refresh vehicle data
-      await refreshVehicle();
-      
       // Close modal and redirect after a short delay
       setShowDeleteModal(false);
       setTimeout(() => {
