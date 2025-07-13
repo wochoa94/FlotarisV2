@@ -39,6 +39,7 @@ function MaintenanceStatusBadge({ status }: { status: MaintenanceOrder['status']
 
 export function MaintenanceOrders() {
   const { user } = useAuth();
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const {
     // Data
     maintenanceOrders,
@@ -67,6 +68,12 @@ export function MaintenanceOrders() {
     clearAllFilters,
     refreshData,
   } = useMaintenanceOrdersData();
+
+  // Enhanced clear all filters function that also closes the modal
+  const handleClearAllFilters = () => {
+    clearAllFilters();
+    setShowFilterModal(false);
+  };
 
   // Render sort icon
   const renderSortIcon = (column: string) => {
@@ -150,16 +157,125 @@ export function MaintenanceOrders() {
             Manage vehicle maintenance orders and schedules
           </p>
         </div>
-        {user?.isAdmin && (
-          <Link
-            to="/maintenance-orders/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        <div className="flex items-center space-x-3">
+          {/* Filter Button */}
+          <button
+            onClick={() => setShowFilterModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Maintenance Order
-          </Link>
-        )}
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+            {(searchTerm || statusFilters.length > 0) && (
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Active
+              </span>
+            )}
+          </button>
+          
+          {/* Add Maintenance Order Button */}
+          {user?.isAdmin && (
+            <Link
+              to="/maintenance-orders/new"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Maintenance Order
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div className="px-4 py-5 sm:p-6">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <Filter className="h-5 w-5 text-gray-400 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Search & Filter Maintenance Orders</h3>
+                </div>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Filter Content */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {/* Search */}
+                <div className="lg:col-span-2">
+                  <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                    Search Maintenance Orders
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      id="search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      placeholder="Search by order number, vehicle, location, type, or description..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Status Filters */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status Filter
+                  </label>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'active', label: 'Active' },
+                      { value: 'scheduled', label: 'Scheduled' },
+                      { value: 'pending_authorization', label: 'Pending Authorization' },
+                      { value: 'completed', label: 'Completed' }
+                    ].map((status) => (
+                      <label key={status.value} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={statusFilters.includes(status.value)}
+                          onChange={() => toggleStatusFilter(status.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">{status.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
+                <div>
+                  {(searchTerm || statusFilters.length > 0) && (
+                    <button
+                      onClick={handleClearAllFilters}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear All Filters
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -231,69 +347,6 @@ export function MaintenanceOrders() {
                   <dd className="text-lg font-medium text-gray-900">${totalCost.toLocaleString()}</dd>
                 </dl>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Search Maintenance Orders
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search by order number, vehicle, location, type, or description..."
-                />
-              </div>
-            </div>
-            
-            {/* Status Filters */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status Filter
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: 'active', label: 'Active' },
-                  { value: 'scheduled', label: 'Scheduled' },
-                  { value: 'pending_authorization', label: 'Pending Authorization' },
-                  { value: 'completed', label: 'Completed' }
-                ].map((status) => (
-                  <label key={status.value} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={statusFilters.includes(status.value)}
-                      onChange={() => toggleStatusFilter(status.value)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{status.label}</span>
-                  </label>
-                ))}
-              </div>
-              
-              {/* Clear Filters */}
-              {(searchTerm || statusFilters.length > 0) && (
-                <button
-                  onClick={clearAllFilters}
-                  className="mt-2 inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Clear All
-                </button>
-              )}
             </div>
           </div>
         </div>
