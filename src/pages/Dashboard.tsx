@@ -64,12 +64,6 @@ export function Dashboard() {
       href: '/vehicles',
     },
     {
-      name: 'Active Vehicles',
-      value: activeVehicles,
-      icon: TrendingUp,
-      color: 'bg-green-500',
-    },
-    {
       name: 'Total Drivers',
       value: totalDrivers,
       icon: Users,
@@ -77,10 +71,10 @@ export function Dashboard() {
       href: '/drivers',
     },
     {
-      name: 'Maintenance Cost',
-      value: `$${totalMaintenanceCost.toLocaleString()}`,
-      icon: DollarSign,
-      color: 'bg-yellow-500',
+      name: 'Active Vehicles', 
+      value: activeVehicles,
+      icon: TrendingUp,
+      color: 'bg-green-500',
     },
   ];
 
@@ -95,7 +89,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           const content = (
@@ -132,6 +126,85 @@ export function Dashboard() {
         })}
       </div>
 
+      {/* Cost Overview Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Total Maintenance Cost */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-yellow-500 p-3 rounded-md">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Total Maintenance Cost</h3>
+              <div className="text-3xl font-bold text-yellow-600">
+                ${totalMaintenanceCost.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-500 mt-1">Fleet-wide expenses</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Highest Maintenance Cost Vehicle */}
+        {summary?.highestMaintenanceCostVehicle && (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-red-500 p-3 rounded-md">
+                  <Award className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Highest Cost Vehicle</h3>
+                <div className="text-2xl font-bold text-red-600 mb-2">
+                  ${summary.highestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
+                </div>
+                <div className="text-sm font-medium text-gray-900">{summary.highestMaintenanceCostVehicle.name}</div>
+                <div className="text-xs text-gray-500">
+                  {summary.highestMaintenanceCostVehicle.licensePlate || 'No license plate'}
+                </div>
+                <Link
+                  to={`/vehicles/${summary.highestMaintenanceCostVehicle.id}`}
+                  className="mt-3 inline-flex items-center text-sm text-red-600 hover:text-red-700"
+                >
+                  View Details →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Lowest Maintenance Cost Vehicle */}
+        {summary?.lowestMaintenanceCostVehicle && (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-green-500 p-3 rounded-md">
+                  <TrendingDown className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Lowest Cost Vehicle</h3>
+                <div className="text-2xl font-bold text-green-600 mb-2">
+                  ${summary.lowestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
+                </div>
+                <div className="text-sm font-medium text-gray-900">{summary.lowestMaintenanceCostVehicle.name}</div>
+                <div className="text-xs text-gray-500">
+                  {summary.lowestMaintenanceCostVehicle.licensePlate || 'No license plate'}
+                </div>
+                <Link
+                  to={`/vehicles/${summary.lowestMaintenanceCostVehicle.id}`}
+                  className="mt-3 inline-flex items-center text-sm text-green-600 hover:text-green-700"
+                >
+                  View Details →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Fleet Status Donut Chart */}
         <div className="bg-white shadow rounded-lg">
@@ -147,57 +220,6 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Upcoming Maintenance */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Upcoming Maintenance
-              </h3>
-              <Calendar className="h-5 w-5 text-gray-400" />
-            </div>
-            
-            {upcomingMaintenance.length > 0 ? (
-              <div className="space-y-3">
-                {upcomingMaintenance.slice(0, 5).map((vehicle) => (
-                  <div key={vehicle.id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-md">
-                    <div className="flex items-center">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{vehicle.name}</p>
-                        <p className="text-xs text-gray-500">{vehicle.make} {vehicle.model}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">
-                        {vehicle.nextMaintenance && formatDate(vehicle.nextMaintenance)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {upcomingMaintenance.length > 5 && (
-                  <div className="text-center pt-2">
-                    <Link 
-                      to="/vehicles" 
-                      className="text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      View all vehicles
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No upcoming maintenance scheduled</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Dashboard Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Maintenance Orders Status */}
         {summary?.maintenanceOrdersStatusCounts && (
           <div className="bg-white shadow rounded-lg">
@@ -206,55 +228,32 @@ export function Dashboard() {
                 <Wrench className="h-5 w-5 inline mr-2" />
                 Maintenance Orders Status
               </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">Active</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Active Orders */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    {summary.maintenanceOrdersStatusCounts.active}
                   </div>
-                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.active} orders</span>
+                  <div className="text-sm font-medium text-green-800">Active</div>
+                  <div className="text-xs text-green-600 mt-1">In Progress</div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">Scheduled</span>
+                
+                {/* Scheduled Orders */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">
+                    {summary.maintenanceOrdersStatusCounts.scheduled}
                   </div>
-                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.scheduled} orders</span>
+                  <div className="text-sm font-medium text-blue-800">Scheduled</div>
+                  <div className="text-xs text-blue-600 mt-1">Upcoming</div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">Pending Authorization</span>
+                
+                {/* Pending Authorization Orders */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-yellow-600 mb-1">
+                    {summary.maintenanceOrdersStatusCounts.pending_authorization}
                   </div>
-                  <span className="text-sm text-gray-500">{summary.maintenanceOrdersStatusCounts.pending_authorization} orders</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Vehicle Schedules Status */}
-        {summary?.vehicleSchedulesStatusCounts && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                <Calendar className="h-5 w-5 inline mr-2" />
-                Vehicle Schedules Status
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">Active</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{summary.vehicleSchedulesStatusCounts.active} schedules</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">Scheduled</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{summary.vehicleSchedulesStatusCounts.scheduled} schedules</span>
+                  <div className="text-sm font-medium text-yellow-800">Pending Auth</div>
+                  <div className="text-xs text-yellow-600 mt-1">Awaiting Approval</div>
                 </div>
               </div>
             </div>
@@ -262,76 +261,34 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* Maintenance Cost Leaders */}
-      {(summary?.highestMaintenanceCostVehicle || summary?.lowestMaintenanceCostVehicle) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Highest Maintenance Cost Vehicle */}
-          {summary?.highestMaintenanceCostVehicle && (
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  <Award className="h-5 w-5 inline mr-2 text-red-500" />
-                  Highest Maintenance Cost
-                </h3>
-                <div className="bg-red-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-lg font-medium text-gray-900">{summary.highestMaintenanceCostVehicle.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        License: {summary.highestMaintenanceCostVehicle.licensePlate || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-red-600">
-                        ${summary.highestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-gray-500">Total Cost</div>
-                    </div>
-                  </div>
-                  <Link
-                    to={`/vehicles/${summary.highestMaintenanceCostVehicle.id}`}
-                    className="mt-3 inline-flex items-center text-sm text-red-600 hover:text-red-700"
-                  >
-                    View Vehicle Details →
-                  </Link>
+      {/* Vehicle Schedules Status */}
+      {summary?.vehicleSchedulesStatusCounts && (
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <Calendar className="h-5 w-5 inline mr-2" />
+              Vehicle Schedules Status
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Active Schedules */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                <div className="text-3xl font-bold text-green-600 mb-2">
+                  {summary.vehicleSchedulesStatusCounts.active}
                 </div>
+                <div className="text-lg font-medium text-green-800 mb-1">Active Schedules</div>
+                <div className="text-sm text-green-600">Currently Running</div>
+              </div>
+              
+              {/* Scheduled Schedules */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">
+                  {summary.vehicleSchedulesStatusCounts.scheduled}
+                </div>
+                <div className="text-lg font-medium text-blue-800 mb-1">Scheduled</div>
+                <div className="text-sm text-blue-600">Future Assignments</div>
               </div>
             </div>
-          )}
-
-          {/* Lowest Maintenance Cost Vehicle */}
-          {summary?.lowestMaintenanceCostVehicle && (
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  <TrendingDown className="h-5 w-5 inline mr-2 text-green-500" />
-                  Lowest Maintenance Cost
-                </h3>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-lg font-medium text-gray-900">{summary.lowestMaintenanceCostVehicle.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        License: {summary.lowestMaintenanceCostVehicle.licensePlate || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
-                        ${summary.lowestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-gray-500">Total Cost</div>
-                    </div>
-                  </div>
-                  <Link
-                    to={`/vehicles/${summary.lowestMaintenanceCostVehicle.id}`}
-                    className="mt-3 inline-flex items-center text-sm text-green-600 hover:text-green-700"
-                  >
-                    View Vehicle Details →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
