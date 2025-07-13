@@ -93,6 +93,18 @@ export function useGanttChartData(
         // Find driver from the nested data or fallback to drivers array
         const driver = (schedule as any).driver || drivers.find(d => d.id === schedule.driverId);
         
+        // Enhanced color coding for vehicle schedules
+        let scheduleColor: string;
+        if (schedule.status === 'completed') {
+          scheduleColor = '#808080'; // Grey for completed
+        } else if (schedule.status === 'active') {
+          scheduleColor = '#1976D2'; // Blue for active
+        } else if (schedule.status === 'scheduled') {
+          scheduleColor = '#64B5F6'; // Light blue for scheduled
+        } else {
+          scheduleColor = '#1976D2'; // Default to blue for any other status
+        }
+        
         return {
           id: schedule.id,
           vehicleId: schedule.vehicleId,
@@ -100,7 +112,7 @@ export function useGanttChartData(
           title: driver ? driver.name : 'Unknown Driver',
           startDate: schedule.startDate,
           endDate: schedule.endDate,
-          color: schedule.status === 'completed' ? '#808080' : '#1976D2', // Grey for completed, blue for others
+          color: scheduleColor,
           details: {
             driverName: driver?.name,
             status: schedule.status,
@@ -110,18 +122,28 @@ export function useGanttChartData(
       });
 
       // Transform maintenance orders into Gantt items
-      const maintenanceItems: GanttItem[] = maintenanceOrders.map(order => ({
+      const maintenanceItems: GanttItem[] = maintenanceOrders.map(order => {
+        // Enhanced color coding for maintenance orders
+        let maintenanceColor: string;
+        if (order.status === 'completed') {
+          maintenanceColor = '#808080'; // Grey for completed
+        } else if (order.status === 'pending_authorization') {
+          maintenanceColor = '#FFF59D'; // Less pale yellow for pending authorization
+        } else if (order.status === 'active') {
+          maintenanceColor = '#FF9800'; // Orange-ish amber for active
+        } else if (order.status === 'scheduled') {
+          maintenanceColor = '#FFC107'; // Amber for scheduled
+        } else {
+          maintenanceColor = '#FFC107'; // Default to amber for any other status
+        }
+        
+        return {
         id: order.id,
         vehicleId: order.vehicleId,
         type: 'maintenance' as const,
         title: order.orderNumber,
         startDate: order.startDate,
-        endDate: order.estimatedCompletionDate,
-        color:
-          order.status === 'completed'
-            ? '#808080' // Grey for completed
-            : order.status === 'pending_authorization'
-            ? '#FFFDE7' // Pale yellow for pending authorization (barely visible)
+          color: maintenanceColor,
             : '#FFC107', // Amber for scheduled, active, or any other non-completed status
         details: {
           orderNumber: order.orderNumber,
@@ -129,8 +151,8 @@ export function useGanttChartData(
           status: order.status,
           urgent: order.urgent || false,
           location: order.location || undefined
-        }
-      }));
+        };
+      });
 
       // Combine all items
       const allItems = [...scheduleItems, ...maintenanceItems];
