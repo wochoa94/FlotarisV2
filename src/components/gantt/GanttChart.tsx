@@ -118,7 +118,7 @@ export function GanttChart({
   }, [startDate]);
 
   return (
-    <>
+    <div>
       {/* Main Gantt Chart Container */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -288,74 +288,6 @@ export function GanttChart({
           </div>
         </div>
       </div>
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-3 max-w-xs pointer-events-none"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translateX(-50%) translateY(-100%)'
-          }}
-        >
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              {tooltip.item.type === 'schedule' ? (
-                <Truck className="h-4 w-4 text-blue-400" />
-              ) : (
-                <Wrench className="h-4 w-4 text-amber-400" />
-              )}
-              <span className="font-semibold">{tooltip.item.title}</span>
-              {tooltip.item.details.urgent && (
-                <AlertTriangle className="h-4 w-4 text-red-400" />
-              )}
-            </div>
-            
-            <div className="text-gray-300 space-y-1">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-3 w-3" />
-                <span>
-                  {formatTooltipDate(tooltip.item.startDate)} - {formatTooltipDate(tooltip.item.endDate)}
-                </span>
-              </div>
-              
-              {tooltip.item.details.driverName && (
-                <div className="flex items-center space-x-2">
-                  <User className="h-3 w-3" />
-                  <span>{tooltip.item.details.driverName}</span>
-                </div>
-              )}
-              
-              {tooltip.item.details.location && (
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-3 w-3" />
-                  <span>{tooltip.item.details.location}</span>
-                </div>
-              )}
-              
-              {tooltip.item.details.description && (
-                <div className="flex items-start space-x-2">
-                  <FileText className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                  <span className="break-words">{tooltip.item.details.description}</span>
-                </div>
-              )}
-              
-              <div className="text-xs text-gray-400 capitalize">
-                Status: {tooltip.item.details.status}
-              </div>
-            </div>
-          </div>
-          
-          {/* Tooltip Arrow */}
-          <div 
-            className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"
-          />
-        </div>
-      )}
-    </>
-  );
-}
 
       {/* Tooltip */}
       {tooltip && (
