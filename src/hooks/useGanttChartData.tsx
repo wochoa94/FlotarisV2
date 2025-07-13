@@ -138,14 +138,16 @@ export function useGanttChartData(
         }
         
         return {
-        }
-        id: order.id,
-        vehicleId: order.vehicleId,
-        type: 'maintenance' as const,
-        title: order.orderNumber,
-        startDate: order.startDate,
+          endDate: order.estimatedCompletionDate,
           color: maintenanceColor,
-            : '#FFC107', // Amber for scheduled, active, or any other non-completed status
+          details: {
+            orderNumber: order.orderNumber,
+            description: order.description || undefined,
+            status: order.status,
+            urgent: order.urgent || false,
+            location: order.location || undefined
+          }
+        };
         details: {
           orderNumber: order.orderNumber,
           description: order.description || undefined,
