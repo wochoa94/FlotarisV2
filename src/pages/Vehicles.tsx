@@ -127,7 +127,7 @@ export function Vehicles() {
           {/* Filter Button */}
           <button
             onClick={() => setShowFilterModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            className="btn-secondary"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -142,7 +142,7 @@ export function Vehicles() {
           {user?.isAdmin && (
             <Link
               to="/vehicles/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="btn-primary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Vehicle
@@ -399,7 +399,7 @@ export function Vehicles() {
                       <div className="flex justify-end space-x-2">
                         <Link
                           to={`/vehicles/${vehicle.id}`}
-                          className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors duration-200"
+                          className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors duration-200 focus-ring"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -407,7 +407,7 @@ export function Vehicles() {
                         {user?.isAdmin && (
                           <Link
                             to={`/vehicles/${vehicle.id}/edit`}
-                            className="text-gray-600 hover:text-gray-900 p-1 hover:bg-gray-50 rounded transition-colors duration-200"
+                            className="text-gray-600 hover:text-gray-900 p-1 hover:bg-gray-50 rounded transition-colors duration-200 focus-ring"
                             title="Edit Vehicle"
                           >
                             <Edit className="h-4 w-4" />
@@ -429,7 +429,7 @@ export function Vehicles() {
               {!loading && (searchTerm || statusFilters.length > 0 || unassignedFilter) && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                  className="btn-secondary"
                 >
                   Clear all filters
                 </button>
