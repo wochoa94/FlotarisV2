@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Users, AlertTriangle, TrendingUp, Calendar, DollarSign, Wrench, Clock, Award, TrendingDown } from 'lucide-react';
 import { useFleetData } from '../hooks/useFleetData';
+import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { VehicleStatusDonutChart } from '../components/charts/VehicleStatusDonutChart';
 import { formatDate } from '../utils/dateUtils';
