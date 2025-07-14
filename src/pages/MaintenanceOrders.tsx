@@ -68,6 +68,7 @@ export function MaintenanceOrders() {
     setItemsPerPage,
     clearAllFilters,
     refreshData,
+    maintenanceOrderSummary,
   } = useMaintenanceOrdersData();
 
   // Enhanced clear all filters function that also closes the modal
@@ -114,11 +115,11 @@ export function MaintenanceOrders() {
     return pages;
   };
 
-  // Calculate summary statistics from current data
-  const activeOrders = maintenanceOrders.filter(o => o.status === 'active').length;
-  const scheduledOrders = maintenanceOrders.filter(o => o.status === 'scheduled').length;
-  const pendingOrders = maintenanceOrders.filter(o => o.status === 'pending_authorization').length;
-  const totalCost = maintenanceOrders.reduce((sum, o) => sum + (o.cost || 0), 0);
+  // Use backend summary data instead of calculating from paginated results
+  const activeOrders = maintenanceOrderSummary?.active || 0;
+  const scheduledOrders = maintenanceOrderSummary?.scheduled || 0;
+  const pendingOrders = maintenanceOrderSummary?.pending_authorization || 0;
+  const totalCost = maintenanceOrderSummary?.totalCompletedCost || 0;
 
   if (error) {
     return (
@@ -344,7 +345,7 @@ export function MaintenanceOrders() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Cost</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Completed Cost</dt>
                   <dd className="text-lg font-medium text-gray-900">${totalCost.toLocaleString()}</dd>
                 </dl>
               </div>

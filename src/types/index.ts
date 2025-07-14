@@ -235,3 +235,11 @@ export interface DashboardSummary {
     licensePlate: string | null;
   } | null;
 }
+
+// Maintenance Order Summary Types
+export interface MaintenanceOrderSummary {
+  active: number;
+  scheduled: number;
+  pending_authorization: number;
+  totalCompletedCost: number;
+}

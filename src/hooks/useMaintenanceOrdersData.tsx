@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MaintenanceOrder, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse } from '../types';
+import { MaintenanceOrder, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary } from '../types';
 import { maintenanceOrderService } from '../services/apiService';
 
 type SortColumn = 'orderNumber' | 'vehicleName' | 'startDate' | 'estimatedCompletionDate' | 'cost' | 'status';
@@ -33,6 +33,9 @@ interface UseMaintenanceOrdersDataReturn {
   setItemsPerPage: (limit: number) => void;
   clearAllFilters: () => void;
   refreshData: () => Promise<void>;
+
+  // Summary data
+  maintenanceOrderSummary: MaintenanceOrderSummary | null;
 }
 
 export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
@@ -77,6 +80,7 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [maintenanceOrderSummary, setMaintenanceOrderSummary] = useState<MaintenanceOrderSummary | null>(null);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -128,13 +132,18 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
         limit: itemsPerPage,
       };
 
-      const response: PaginatedMaintenanceOrdersResponse = await maintenanceOrderService.fetchPaginatedMaintenanceOrders(queryParams);
+      // Fetch both paginated data and summary concurrently
+      const [response, summaryResponse]: [PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary] = await Promise.all([
+        maintenanceOrderService.fetchPaginatedMaintenanceOrders(queryParams),
+        maintenanceOrderService.fetchMaintenanceOrderSummary()
+      ]);
       
       setMaintenanceOrders(response.maintenanceOrders);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
+      setMaintenanceOrderSummary(summaryResponse);
     } catch (err) {
       console.error('Error fetching maintenance orders:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch maintenance orders');
@@ -143,6 +152,7 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
       setTotalPages(0);
       setHasNextPage(false);
       setHasPreviousPage(false);
+      setMaintenanceOrderSummary(null);
     } finally {
       setLoading(false);
     }
@@ -239,5 +249,8 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     setItemsPerPage,
     clearAllFilters,
     refreshData,
+
+    // Summary data
+    maintenanceOrderSummary,
   };
 }

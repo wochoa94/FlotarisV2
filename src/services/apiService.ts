@@ -1,4 +1,5 @@
 import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule, User, VehicleQueryParams, PaginatedVehiclesResponse, DriverQueryParams, PaginatedDriversResponse, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse } from '../types';
+import { MaintenanceOrderSummary } from '../types';
 
 // IMPORTANT: Replace this with the actual URL of your running backend service.
 // For local development, it might be something like 'http://localhost:3000'
@@ -357,6 +358,12 @@ export const maintenanceOrderService = {
 
     const endpoint = `/maintenance-orders/paginated${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await apiCall(endpoint);
+    return response;
+  },
+
+  // New method for fetching maintenance order summary statistics
+  async fetchMaintenanceOrderSummary(): Promise<MaintenanceOrderSummary> {
+    const response = await apiCall('/maintenance-orders/summary');
     return response;
   },
 };
