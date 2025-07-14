@@ -42,6 +42,8 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   const getInitialState = () => {
     const search = searchParams.get('search') || '';
     const status = searchParams.getAll('status');
+    // If no status filters are specified in URL, use backend's default filters
+    const defaultStatusFilters = status.length > 0 ? status : ['active', 'scheduled'];
     const sortBy = searchParams.get('sortBy') as SortColumn | null;
     const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'desc'; // Default to newest first
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -49,7 +51,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     
     return {
       search,
-      status: status.length > 0 ? status : ['active', 'scheduled'], // Default to active and scheduled
+      status: defaultStatusFilters,
       sortBy: sortBy || 'startDate', // Default sort by start date
       sortOrder,
       page,
