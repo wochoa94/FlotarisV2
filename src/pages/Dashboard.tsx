@@ -11,22 +11,28 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <LoadingSpinner size="lg" text="Loading dashboard..." />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">{error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="text-blue-600 hover:text-blue-700"
-        >
-          Try again
-        </button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="text-red-600 mb-4 font-medium">{error}</div>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="btn-primary"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -79,7 +85,7 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Fleet Dashboard</h1>
@@ -93,8 +99,8 @@ export function Dashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           const content = (
-            <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200">
-              <div className="p-5">
+            <div className="card">
+              <div className="card-body">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <div className={`${stat.color} p-3 rounded-md`}>
@@ -127,35 +133,34 @@ export function Dashboard() {
       </div>
 
       {/* Cost Overview Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Cost Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Maintenance Cost */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+        <div className="card">
+          <div className="card-body text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-yellow-500 p-3 rounded-md">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
             </div>
-            <div className="text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">Total Maintenance Cost</h3>
               <div className="text-3xl font-bold text-yellow-600">
                 ${totalMaintenanceCost.toLocaleString()}
               </div>
               <div className="text-sm text-gray-500 mt-1">Fleet-wide expenses</div>
-            </div>
           </div>
         </div>
 
         {/* Highest Maintenance Cost Vehicle */}
         {summary?.highestMaintenanceCostVehicle && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="card">
+            <div className="card-body text-center">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-red-500 p-3 rounded-md">
                   <Award className="h-6 w-6 text-white" />
                 </div>
               </div>
-              <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Highest Cost Vehicle</h3>
                 <div className="text-2xl font-bold text-red-600 mb-2">
                   ${summary.highestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
@@ -166,25 +171,23 @@ export function Dashboard() {
                 </div>
                 <Link
                   to={`/vehicles/${summary.highestMaintenanceCostVehicle.id}`}
-                  className="mt-3 inline-flex items-center text-sm text-red-600 hover:text-red-700"
+                  className="mt-3 inline-flex items-center text-sm text-red-600 hover:text-red-700 transition-colors duration-200"
                 >
                   View Details →
                 </Link>
-              </div>
             </div>
           </div>
         )}
 
         {/* Lowest Maintenance Cost Vehicle */}
         {summary?.lowestMaintenanceCostVehicle && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="card">
+            <div className="card-body text-center">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-green-500 p-3 rounded-md">
                   <TrendingDown className="h-6 w-6 text-white" />
                 </div>
               </div>
-              <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Lowest Cost Vehicle</h3>
                 <div className="text-2xl font-bold text-green-600 mb-2">
                   ${summary.lowestMaintenanceCostVehicle.maintenanceCost.toLocaleString()}
@@ -195,20 +198,20 @@ export function Dashboard() {
                 </div>
                 <Link
                   to={`/vehicles/${summary.lowestMaintenanceCostVehicle.id}`}
-                  className="mt-3 inline-flex items-center text-sm text-green-600 hover:text-green-700"
+                  className="mt-3 inline-flex items-center text-sm text-green-600 hover:text-green-700 transition-colors duration-200"
                 >
                   View Details →
                 </Link>
-              </div>
             </div>
           </div>
         )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Fleet Status Donut Chart */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+        <div className="card">
+          <div className="card-body">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               Fleet Status Overview
             </h3>
@@ -222,15 +225,15 @@ export function Dashboard() {
 
         {/* Maintenance Orders Status */}
         {summary?.maintenanceOrdersStatusCounts && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="card">
+            <div className="card-body">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 <Wrench className="h-5 w-5 inline mr-2" />
                 Maintenance Orders Status
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Active Orders */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center hover:bg-green-100 transition-colors duration-200">
                   <div className="text-2xl font-bold text-green-600 mb-1">
                     {summary.maintenanceOrdersStatusCounts.active}
                   </div>
@@ -239,7 +242,7 @@ export function Dashboard() {
                 </div>
                 
                 {/* Scheduled Orders */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center hover:bg-blue-100 transition-colors duration-200">
                   <div className="text-2xl font-bold text-blue-600 mb-1">
                     {summary.maintenanceOrdersStatusCounts.scheduled}
                   </div>
@@ -248,7 +251,7 @@ export function Dashboard() {
                 </div>
                 
                 {/* Pending Authorization Orders */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center hover:bg-yellow-100 transition-colors duration-200">
                   <div className="text-2xl font-bold text-yellow-600 mb-1">
                     {summary.maintenanceOrdersStatusCounts.pending_authorization}
                   </div>
@@ -263,15 +266,15 @@ export function Dashboard() {
 
       {/* Vehicle Schedules Status */}
       {summary?.vehicleSchedulesStatusCounts && (
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+        <div className="card">
+          <div className="card-body">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               <Calendar className="h-5 w-5 inline mr-2" />
               Vehicle Schedules Status
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Active Schedules */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center hover:bg-green-100 transition-colors duration-200">
                 <div className="text-3xl font-bold text-green-600 mb-2">
                   {summary.vehicleSchedulesStatusCounts.active}
                 </div>
@@ -280,7 +283,7 @@ export function Dashboard() {
               </div>
               
               {/* Scheduled Schedules */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center hover:bg-blue-100 transition-colors duration-200">
                 <div className="text-3xl font-bold text-blue-600 mb-2">
                   {summary.vehicleSchedulesStatusCounts.scheduled}
                 </div>
@@ -293,15 +296,15 @@ export function Dashboard() {
       )}
 
       {/* Recent Vehicles */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
+      <div className="card">
+        <div className="card-body">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
               Recent Vehicles
             </h3>
             <Link 
               to="/vehicles" 
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
             >
               View all
             </Link>
@@ -309,27 +312,27 @@ export function Dashboard() {
           
           {vehicles.length > 0 ? (
             <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="table">
+                <thead className="table-header">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="table-header-cell">
                       Vehicle
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="table-header-cell">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="table-header-cell">
                       Mileage
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="table-header-cell">
                       Next Maintenance
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {vehicles.slice(0, 5).map((vehicle) => (
-                    <tr key={vehicle.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={vehicle.id} className="table-row">
+                      <td className="table-cell">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {vehicle.name}
@@ -339,20 +342,13 @@ export function Dashboard() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                          vehicle.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
-                          vehicle.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                          'bg-red-100 text-red-800 border-red-200'
-                        }`}>
-                          {vehicle.status === 'active' ? 'Active' : 
-                           vehicle.status === 'maintenance' ? 'Maintenance' : 'Idle'}
-                        </span>
+                      <td className="table-cell">
+                        <StatusBadge status={vehicle.status} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="table-cell">
                         {vehicle.mileage?.toLocaleString() || 'N/A'} miles
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="table-cell text-gray-500">
                         {vehicle.nextMaintenance 
                           ? formatDate(vehicle.nextMaintenance)
                           : 'Not scheduled'
@@ -367,6 +363,12 @@ export function Dashboard() {
             <div className="text-center py-4">
               <Truck className="h-8 w-8 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-500">No vehicles found</p>
+              <Link 
+                to="/vehicles/new" 
+                className="mt-2 btn-primary"
+              >
+                Add your first vehicle
+              </Link>
             </div>
           )}
         </div>

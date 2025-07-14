@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Truck, Users, LogOut, Settings, Wrench, Calendar, BarChart3 } from 'lucide-react';
+import { Home, Truck, Users, LogOut, Settings, Wrench, Calendar, BarChart3, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navigation() {
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
@@ -50,104 +49,83 @@ export function Navigation() {
     return location.pathname.startsWith(href);
   };
 
-  const handleMouseEnter = () => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // Set a 300ms delay before showing the dropdown
-    timeoutRef.current = setTimeout(() => {
-      setIsDropdownVisible(true);
-    }, 300);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleMouseLeave = () => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // Set a 100ms delay before hiding the dropdown
-    timeoutRef.current = setTimeout(() => {
-      setIsDropdownVisible(false);
-    }, 100);
-  };
-
-  const handleDropdownClick = () => {
-    // Immediately close dropdown when a navigation item is clicked
-    setIsDropdownVisible(false);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  };
-
-  // Cleanup timeout on unmount
+  // Close mobile menu when clicking outside
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
       }
     };
-  }, []);
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            {/* Logo with Dropdown Trigger */}
-            <div 
-              className="relative flex-shrink-0 flex items-center cursor-pointer"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0 flex items-center">
               <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
                 <Settings className="h-8 w-8 text-blue-600" />
                 <span className="ml-2 text-xl font-bold text-gray-900">Flotaris</span>
               </div>
+            </Link>
 
-              {/* Dropdown Menu */}
-              <div
-                ref={dropdownRef}
-                className={`absolute top-full left-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 transition-all duration-300 ease-out transform origin-top-left ${
-                  isDropdownVisible
-                    ? 'opacity-100 scale-100'
-                    : 'opacity-0 scale-95 pointer-events-none'
-                }`}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="py-1">
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        onClick={handleDropdownClick}
-                        className={`group flex items-center px-4 py-3 text-sm transition-colors duration-200 ${
-                          isActive(item.href)
-                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                      >
-                        <Icon className={`h-5 w-5 mr-3 transition-colors duration-200 ${
-                          isActive(item.href)
-                            ? 'text-blue-600'
-                            : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                        <span className="font-medium">{item.name}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:ml-8 lg:flex lg:space-x-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      isActive(item.href)
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 mr-2 ${
+                      isActive(item.href)
+                        ? 'text-blue-600'
+                        : 'text-gray-400'
+                    }`} />
+                    {item.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
-          {/* User Info and Sign Out */}
+          {/* Right side */}
           <div className="flex items-center space-x-4">
+            {/* Mobile menu button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="lg:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Open main menu</span>
+              {isMobileMenuOpen ? (
+                <X className="block h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="block h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+
+            {/* User Info and Sign Out */}
             <div className="text-sm text-gray-700">
               <span className="font-medium">{user?.email}</span>
               {user?.isAdmin && (
@@ -158,7 +136,7 @@ export function Navigation() {
             </div>
             <button
               onClick={signOut}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out"
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
@@ -167,30 +145,50 @@ export function Navigation() {
         </div>
       </div>
       
-      {/* Mobile navigation */}
-      <div className="sm:hidden">
-        <div className="pt-2 pb-3 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200 ${
-                  isActive(item.href)
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                }`}
+      {/* Mobile navigation overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 bg-white z-40 overflow-y-auto" ref={dropdownRef}>
+          <div className="px-4 pt-4 pb-3 space-y-1">
+            {/* Mobile header */}
+            <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+              <div className="flex items-center">
+                <Settings className="h-8 w-8 text-blue-600" />
+                <span className="ml-2 text-xl font-bold text-gray-900">Flotaris</span>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               >
-                <div className="flex items-center">
-                  <Icon className="h-4 w-4 mr-3" />
-                  {item.name}
-                </div>
-              </Link>
-            );
-          })}
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            {/* Mobile navigation items */}
+            <div className="pt-4 space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`group flex items-center px-4 py-3 text-base font-medium rounded-md transition-colors duration-200 ${
+                      isActive(item.href)
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className={`h-5 w-5 mr-3 ${
+                      isActive(item.href) ? 'text-blue-600' : 'text-gray-400'
+                    }`} />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 }

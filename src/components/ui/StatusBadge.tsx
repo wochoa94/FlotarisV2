@@ -3,28 +3,35 @@ import React from 'react';
 interface StatusBadgeProps {
   status: 'active' | 'maintenance' | 'idle';
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const statusConfig = {
   active: {
     label: 'Active',
-    className: 'bg-green-100 text-green-800 border-green-200',
+    className: 'badge-success',
   },
   maintenance: {
     label: 'Maintenance',
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    className: 'badge-warning',
   },
   idle: {
     label: 'Idle',
-    className: 'bg-red-100 text-red-800 border-red-200',
+    className: 'badge-danger',
   },
 };
 
-export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
+const sizeClasses = {
+  sm: 'px-2 py-0.5 text-xs',
+  md: 'px-2.5 py-0.5 text-xs',
+  lg: 'px-3 py-1 text-sm',
+};
+
+export function StatusBadge({ status, className = '', size = 'md' }: StatusBadgeProps) {
   const config = statusConfig[status];
   
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className} ${className}`}>
+    <span className={`badge ${config.className} ${sizeClasses[size]} ${className}`}>
       {config.label}
     </span>
   );
