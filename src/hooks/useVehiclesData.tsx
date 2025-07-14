@@ -19,7 +19,7 @@ interface UseVehiclesDataReturn {
   searchTerm: string;
   statusFilters: string[];
   unassignedFilter: boolean;
-  sortBy: SortColumn | null;
+  sortBy: SortColumn;
   sortOrder: SortDirection;
   itemsPerPage: number;
   loading: boolean;
@@ -45,7 +45,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     const search = searchParams.get('search') || '';
     const status = searchParams.getAll('status');
     const unassigned = searchParams.get('unassigned') === 'true';
-    const sortBy = searchParams.get('sortBy') as SortColumn | null;
+    const sortBy = (searchParams.get('sortBy') as SortColumn) || 'status'; // Default to status sort
     const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'asc';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
@@ -67,7 +67,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
   const [searchTerm, setSearchTermState] = useState(initialState.search);
   const [statusFilters, setStatusFilters] = useState<string[]>(initialState.status);
   const [unassignedFilter, setUnassignedFilterState] = useState(initialState.unassigned);
-  const [sortBy, setSortByState] = useState<SortColumn | null>(initialState.sortBy);
+  const [sortBy, setSortByState] = useState<SortColumn>(initialState.sortBy);
   const [sortOrder, setSortOrderState] = useState<SortDirection>(initialState.sortOrder);
   const [currentPage, setCurrentPageState] = useState(initialState.page);
   const [itemsPerPage, setItemsPerPageState] = useState(initialState.limit);
@@ -109,7 +109,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
     statusFilters.forEach(status => params.append('status', status));
     if (unassignedFilter) params.set('unassigned', 'true');
-    if (sortBy) params.set('sortBy', sortBy);
+    if (sortBy !== 'status') params.set('sortBy', sortBy); // Only add to URL if not default
     if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
     if (itemsPerPage !== 10) params.set('limit', itemsPerPage.toString());
@@ -127,7 +127,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
         search: debouncedSearchTerm || undefined,
         status: statusFilters.length > 0 ? statusFilters : undefined,
         unassignedOnly: unassignedFilter || undefined,
-        sortBy: sortBy || undefined,
+        sortBy: sortBy,
         sortOrder,
         page: currentPage,
         limit: itemsPerPage,
@@ -214,7 +214,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     setSearchTermState('');
     setStatusFilters([]);
     setUnassignedFilterState(false);
-    setSortByState(null);
+    setSortByState('status'); // Reset to default status sort
     setSortOrderState('asc');
     setCurrentPageState(1);
   }, []);
