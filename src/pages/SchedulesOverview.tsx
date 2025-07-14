@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, Truck, Wrench, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, TrendingUp, Truck, Wrench, AlertTriangle, Settings } from 'lucide-react';
 import { useGanttChartData } from '../hooks/useGanttChartData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { GanttChart } from '../components/gantt/GanttChart';
-import { getToday, addDaysToDate, formatGanttDate } from '../utils/dateUtils';
-import { format } from 'date-fns';
+import { getToday, addDaysToDate } from '../utils/dateUtils';
+import { DateNavigationModal } from '../components/modals/DateNavigationModal';
 
 export function SchedulesOverview() {
   // Date control state
   const [currentStartDate, setCurrentStartDate] = useState(getToday());
   const [daysToShow, setDaysToShow] = useState(7);
+  const [showDateNavigationModal, setShowDateNavigationModal] = useState(false);
 
   // Fetch Gantt chart data using the dedicated hook
   const { ganttVehicles, ganttItems, stats, loading, error, refreshGanttData } = useGanttChartData(
@@ -87,95 +88,31 @@ export function SchedulesOverview() {
       </div>
 
       {/* Enhanced Date Range Controls */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Date Selection */}
-            <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                value={format(currentStartDate, 'yyyy-MM-dd')}
-                onChange={handleStartDateChange}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-
-            {/* Days to Show Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                View Duration
-              </label>
-              <div className="flex space-x-2">
-                {[
-                  { value: 7, label: '1 Week' },
-                  { value: 14, label: '2 Weeks' },
-                  { value: 30, label: '1 Month' }
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleDaysToShowChange(option.value)}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                      daysToShow === option.value
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigation Controls */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quick Navigation
-              </label>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={goToPreviousWeek}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-                  title="Previous week"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                
-                <button
-                  onClick={goToToday}
-                  className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-200"
-                >
-                  Today
-                </button>
-                
-                <button
-                  onClick={goToNextWeek}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-                  title="Next week"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Current Range Display */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Current Range:</span> {formatGanttDate(currentStartDate)} - {formatGanttDate(addDaysToDate(currentStartDate, daysToShow - 1))}
-              {loading && (
-                <span className="ml-4 inline-flex items-center">
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Loading data...
-                </span>
-              )}
-            </div>
-          </div>
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-600">
+          {loading && (
+            <span className="inline-flex items-center">
+              <LoadingSpinner size="sm" className="mr-2" />
+              Loading data...
+            </span>
+          )}
         </div>
+        <button
+          onClick={() => setShowDateNavigationModal(true)}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Date Navigation
+        </button>
       </div>
+
+      {/* Gantt Chart */}
+      <GanttChart
+        vehicles={ganttVehicles}
+        items={ganttItems}
+        startDate={currentStartDate}
+        daysToShow={daysToShow}
+      />
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -291,29 +228,6 @@ export function SchedulesOverview() {
         </div>
       </div>
 
-      {/* Gantt Chart */}
-      <GanttChart
-        vehicles={ganttVehicles}
-        items={ganttItems}
-        startDate={currentStartDate}
-        daysToShow={daysToShow}
-      />
-
-      {/* Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">How to use the timeline</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Use the date picker to jump to any specific date</li>
-          <li>• Select different view durations (1 Week, 2 Weeks, 1 Month)</li>
-          <li>• Use the navigation arrows to move between periods</li>
-          <li>• Click "Today" to jump to the current date</li>
-          <li>• Hover over schedule blocks to see detailed information</li>
-          <li>• Use keyboard navigation (Tab and Enter) for accessibility</li>
-          <li>• Scroll horizontally to see more dates within the selected range</li>
-          <li>• Completed items are shown in grey for historical reference</li>
-        </ul>
-      </div>
-
       {/* Empty State */}
       {ganttItems.length === 0 && !loading && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
@@ -340,6 +254,19 @@ export function SchedulesOverview() {
           </div>
         </div>
       )}
+
+      {/* Date Navigation Modal */}
+      <DateNavigationModal
+        isOpen={showDateNavigationModal}
+        onClose={() => setShowDateNavigationModal(false)}
+        currentStartDate={currentStartDate}
+        daysToShow={daysToShow}
+        onStartDateChange={handleStartDateChange}
+        onDaysToShowChange={handleDaysToShowChange}
+        onPreviousWeek={goToPreviousWeek}
+        onNextWeek={goToNextWeek}
+        onGoToToday={goToToday}
+      />
     </div>
   );
 }
