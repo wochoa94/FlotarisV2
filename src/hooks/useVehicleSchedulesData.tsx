@@ -248,8 +248,8 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
-    refreshData,
-  };
+
     // Summary data
     vehicleScheduleSummary,
+  };
 }
