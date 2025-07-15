@@ -77,6 +77,7 @@ export function VehicleSchedules() {
     setItemsPerPage,
     clearAllFilters,
     refreshData,
+    vehicleScheduleSummary,
   } = useVehicleSchedulesData();
 
   // Modal state for notes
@@ -176,10 +177,9 @@ export function VehicleSchedules() {
 
   const selectedSchedule = showNotesModal ? vehicleSchedules.find(s => s.id === showNotesModal) : null;
 
-  // Calculate summary statistics from current data
-  const scheduledCount = vehicleSchedules.filter(s => s.status === 'scheduled').length;
-  const activeCount = vehicleSchedules.filter(s => s.status === 'active').length;
-  const completedCount = vehicleSchedules.filter(s => s.status === 'completed').length;
+  // Use backend summary data instead of calculating from paginated results
+  const scheduledCount = vehicleScheduleSummary?.scheduled || 0;
+  const activeCount = vehicleScheduleSummary?.active || 0;
 
   if (error) {
     return (
@@ -339,7 +339,25 @@ export function VehicleSchedules() {
       )}
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="bg-green-500 p-3 rounded-md">
+                  <Truck className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Active Schedules</dt>
+                  <dd className="text-lg font-medium text-gray-900">{activeCount}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
@@ -352,60 +370,6 @@ export function VehicleSchedules() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Scheduled</dt>
                   <dd className="text-lg font-medium text-gray-900">{scheduledCount}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="bg-green-500 p-3 rounded-md">
-                  <Truck className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                  <dd className="text-lg font-medium text-gray-900">{activeCount}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="bg-gray-500 p-3 rounded-md">
-                  <Calendar className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Completed</dt>
-                  <dd className="text-lg font-medium text-gray-900">{completedCount}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="bg-purple-500 p-3 rounded-md">
-                  <User className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Schedules</dt>
-                  <dd className="text-lg font-medium text-gray-900">{totalCount}</dd>
                 </dl>
               </div>
             </div>

@@ -243,3 +243,9 @@ export interface MaintenanceOrderSummary {
   pending_authorization: number;
   totalCompletedCost: number;
 }
+
+// Vehicle Schedule Summary Types
+export interface VehicleScheduleSummary {
+  active: number;
+  scheduled: number;
+}

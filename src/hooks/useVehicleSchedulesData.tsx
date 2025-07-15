@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { VehicleSchedule, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse } from '../types';
+import { VehicleSchedule, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse, VehicleScheduleSummary } from '../types';
 import { vehicleScheduleService } from '../services/apiService';
 
 type SortColumn = 'vehicleName' | 'driverName' | 'startDate' | 'endDate' | 'duration' | 'status';
@@ -33,6 +33,9 @@ interface UseVehicleSchedulesDataReturn {
   setItemsPerPage: (limit: number) => void;
   clearAllFilters: () => void;
   refreshData: () => Promise<void>;
+
+  // Summary data
+  vehicleScheduleSummary: VehicleScheduleSummary | null;
 }
 
 export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
@@ -77,6 +80,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [vehicleScheduleSummary, setVehicleScheduleSummary] = useState<VehicleScheduleSummary | null>(null);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -128,13 +132,18 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
         limit: itemsPerPage,
       };
 
-      const response: PaginatedVehicleSchedulesResponse = await vehicleScheduleService.fetchPaginatedVehicleSchedules(queryParams);
+      // Fetch both paginated data and summary concurrently
+      const [response, summaryResponse]: [PaginatedVehicleSchedulesResponse, VehicleScheduleSummary] = await Promise.all([
+        vehicleScheduleService.fetchPaginatedVehicleSchedules(queryParams),
+        vehicleScheduleService.fetchVehicleScheduleSummary()
+      ]);
       
       setVehicleSchedules(response.vehicleSchedules);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
+      setVehicleScheduleSummary(summaryResponse);
     } catch (err) {
       console.error('Error fetching vehicle schedules:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch vehicle schedules');
@@ -143,6 +152,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
       setTotalPages(0);
       setHasNextPage(false);
       setHasPreviousPage(false);
+      setVehicleScheduleSummary(null);
     } finally {
       setLoading(false);
     }
@@ -240,4 +250,6 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     clearAllFilters,
     refreshData,
   };
+    // Summary data
+    vehicleScheduleSummary,
 }
