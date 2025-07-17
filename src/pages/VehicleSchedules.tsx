@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Calendar, Truck, User, FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw } from 'lucide-react';
+import { Plus, Search, Filter, Calendar, Truck, User, FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useVehicleSchedulesData } from '../hooks/useVehicleSchedulesData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { vehicleScheduleService } from '../services/apiService';
 import { VehicleSchedule } from '../types';
 import { getDaysBetweenDates, parseDate, parseDateEnd, formatTooltipDate } from '../utils/dateUtils';
 
@@ -82,6 +83,18 @@ export function VehicleSchedules() {
 
   // Modal state for notes
   const [showNotesModal, setShowNotesModal] = useState<string | null>(null);
+
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState<{ 
+    isOpen: boolean; 
+    schedule: VehicleSchedule | null; 
+    isActiveSchedule: boolean;
+  }>({
+    isOpen: false,
+    schedule: null,
+    isActiveSchedule: false,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Enhanced clear all filters function that also closes the modal
   const handleClearAllFilters = () => {
@@ -167,8 +180,34 @@ export function VehicleSchedules() {
   };
 
   const handleDeleteSchedule = (scheduleId: string) => {
-    console.log('Delete schedule clicked for:', scheduleId);
-    // TODO: Implement delete schedule functionality
+    const schedule = vehicleSchedules.find(s => s.id === scheduleId);
+    if (!schedule) return;
+    
+    // Check if the schedule is active to show conditional warning
+    const isActiveSchedule = schedule.status === 'active';
+    
+    setDeleteModal({
+      isOpen: true,
+      schedule,
+      isActiveSchedule,
+    });
+  };
+
+  // Handle delete confirmation
+  const confirmDeleteSchedule = async () => {
+    if (!deleteModal.schedule) return;
+
+    setIsDeleting(true);
+    try {
+      await vehicleScheduleService.deleteVehicleSchedule(deleteModal.schedule.id);
+      await refreshData();
+      setDeleteModal({ isOpen: false, schedule: null, isActiveSchedule: false });
+    } catch (error) {
+      console.error('Error deleting vehicle schedule:', error);
+      // You could add error handling here
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleViewNotes = (scheduleId: string) => {
@@ -545,7 +584,7 @@ export function VehicleSchedules() {
                               className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors duration-200"
                               title="Delete Schedule"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </>
                         )}
@@ -687,6 +726,95 @@ export function VehicleSchedules() {
                   className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && deleteModal.schedule && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-lg font-medium text-gray-900">Delete Vehicle Schedule</h3>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                {deleteModal.isActiveSchedule ? (
+                  <div className="mb-4">
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <AlertTriangle className="h-5 w-5 text-red-400" />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-red-800">
+                            <strong>Warning:</strong> You are about to delete an active schedule. This action cannot be undone.
+                          </p>
+                          <p className="text-sm text-red-700 mt-1">
+                            Are you sure you want to proceed?
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 mb-4">
+                    <strong>Warning:</strong> This action cannot be undone. Are you sure you want to permanently delete this schedule?
+                  </p>
+                )}
+                
+                <div className="bg-gray-50 rounded-md p-3">
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-900">
+                      {getVehicleName(deleteModal.schedule.vehicleId)} - {getDriverName(deleteModal.schedule.driverId)}
+                    </p>
+                    <p className="text-gray-500 mt-1">
+                      {formatTooltipDate(deleteModal.schedule.startDate)} - {formatTooltipDate(deleteModal.schedule.endDate)}
+                    </p>
+                    <div className="mt-2">
+                      <ScheduleStatusBadge status={deleteModal.schedule.status} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={() => setDeleteModal({ isOpen: false, schedule: null, isActiveSchedule: false })}
+                  disabled={isDeleting}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteSchedule}
+                  disabled={isDeleting}
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                    deleteModal.isActiveSchedule 
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' 
+                      : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                  }`}
+                >
+                  {isDeleting ? (
+                    <>
+                      <LoadingSpinner size="sm" className="text-white mr-2" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {deleteModal.isActiveSchedule ? 'Delete Active Schedule' : 'Confirm Delete'}
+                    </>
+                  )}
                 </button>
               </div>
             </div>
