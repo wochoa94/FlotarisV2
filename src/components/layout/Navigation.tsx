@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, LogOut, Settings, Wrench, Calendar, BarChart3, Menu, X } from 'lucide-react';
+import { Home, Truck, Users, LogOut, Settings, Wrench, Calendar, BarChart3, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navigation() {
