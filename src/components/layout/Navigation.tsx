@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Truck, Users, LogOut, Settings, Wrench, Calendar, BarChart3, Menu, X } from 'lucide-react';
+import { Home, Users, LogOut, Settings, Wrench, Calendar, BarChart3, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navigation() {
@@ -78,15 +78,12 @@ export function Navigation() {
           {/* Logo Section */}
           <div className="flex items-center justify-start h-16 px-3 border-b border-gray-200">
             <Link to="/" className="flex items-center">
-              {/* Minimalist logo - visible when collapsed */}
-              <Truck className="h-6 w-6 text-blue-600 flex-shrink-0 opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+              {/* Gear icon - always visible */}
+              <Settings className="h-6 w-6 text-blue-600 flex-shrink-0" />
               
-              {/* Full logo - visible when expanded */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center">
-                <Settings className="h-8 w-8 text-blue-600 flex-shrink-0" />
-                <div className="ml-3 overflow-hidden whitespace-nowrap">
-                  <span className="text-xl font-bold text-gray-900">Flotaris</span>
-                </div>
+              {/* Flotaris text - visible when expanded */}
+              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
+                <span className="text-xl font-bold text-gray-900">Flotaris</span>
               </div>
             </Link>
           </div>
