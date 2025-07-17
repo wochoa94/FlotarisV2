@@ -78,9 +78,15 @@ export function Navigation() {
           {/* Logo Section */}
           <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
             <Link to="/" className="flex items-center">
-              <Settings className="h-8 w-8 text-blue-600 flex-shrink-0" />
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
-                <span className="text-xl font-bold text-gray-900">Flotaris</span>
+              {/* Minimalist logo - visible when collapsed */}
+              <Truck className="h-8 w-8 text-blue-600 flex-shrink-0 opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+              
+              {/* Full logo - visible when expanded */}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center">
+                <Settings className="h-8 w-8 text-blue-600 flex-shrink-0" />
+                <div className="ml-3 overflow-hidden whitespace-nowrap">
+                  <span className="text-xl font-bold text-gray-900">Flotaris</span>
+                </div>
               </div>
             </Link>
           </div>
