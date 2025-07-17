@@ -76,10 +76,10 @@ export function Navigation() {
       <nav className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-20 hover:lg:w-64 lg:bg-white lg:shadow-lg lg:border-r lg:border-gray-200 group transition-all duration-300 ease-in-out">
         <div className="flex flex-col w-full">
           {/* Logo Section */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center justify-start h-16 px-3 border-b border-gray-200">
             <Link to="/" className="flex items-center">
               {/* Minimalist logo - visible when collapsed */}
-              <Truck className="h-8 w-8 text-blue-600 flex-shrink-0 opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+              <Truck className="h-6 w-6 text-blue-600 flex-shrink-0 opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
               
               {/* Full logo - visible when expanded */}
               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center">
