@@ -101,7 +101,7 @@ export function EditVehicle() {
       setSuccessMessage('Vehicle updated successfully!');
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('vehicles');
       
       // Redirect to vehicle detail page after a short delay
       setTimeout(() => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Calendar, Gauge, DollarSign, User, Settings, Trash2, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useVehicleDetails } from '../hooks/useVehicleDetails';
+import { useFleetData } from '../hooks/useFleetData';
 import { useAuth } from '../hooks/useAuth';
 import { vehicleService } from '../services/apiService';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -12,6 +13,7 @@ export function VehicleDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { vehicle, loading, error, refreshVehicle } = useVehicleDetails(id);
+  const { refreshData } = useFleetData();
   const { user } = useAuth();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -42,6 +44,9 @@ export function VehicleDetail() {
 
       // Success feedback
       setSuccessMessage('Vehicle deleted successfully!');
+      
+      // Refresh fleet data to update global state
+      await refreshData('vehicles');
       
       // Close modal and redirect after a short delay
       setShowDeleteModal(false);

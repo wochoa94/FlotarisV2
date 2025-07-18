@@ -1,13 +1,22 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { FleetData, Driver, Vehicle, MaintenanceOrder, VehicleSchedule } from '../types';
-import { fetchFleetData } from '../services/apiService';
+import { 
+  fetchFleetData, 
+  fetchDriversOnly, 
+  fetchVehiclesOnly, 
+  fetchMaintenanceOrdersOnly, 
+  fetchVehicleSchedulesOnly,
+  fetchDashboardSummaryOnly
+} from '../services/apiService';
+
+type EntityType = 'drivers' | 'vehicles' | 'maintenanceOrders' | 'vehicleSchedules' | 'summary' | 'all';
 
 interface FleetDataContextType {
   data: FleetData;
   loading: boolean;
   isReconciling: boolean;
   error: string | null;
-  refreshData: () => Promise<void>;
+  refreshData: (entityType?: EntityType) => Promise<void>;
 }
 
 const FleetDataContext = createContext<FleetDataContextType | undefined>(undefined);
@@ -53,8 +62,73 @@ export function FleetDataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const refreshData = async () => {
-    await fetchData();
+  const refreshData = async (entityType: EntityType = 'all') => {
+    try {
+      setError(null);
+      
+      console.log(`=== GRANULAR REFRESH START (${entityType.toUpperCase()}) ===`);
+      
+      if (entityType === 'all') {
+        // Full refresh - use existing fetchData logic
+        console.log('📥 Performing full fleet data refresh...');
+        await fetchData();
+        return;
+      }
+      
+      // Granular refresh - fetch only specific entity type
+      console.log(`📥 Fetching ${entityType} data only...`);
+      
+      let updatedData: Partial<FleetData> = {};
+      
+      switch (entityType) {
+        case 'drivers':
+          const drivers = await fetchDriversOnly();
+          updatedData = { drivers };
+          console.log(`✅ Drivers updated: ${drivers.length} records`);
+          break;
+          
+        case 'vehicles':
+          const vehicles = await fetchVehiclesOnly();
+          updatedData = { vehicles };
+          console.log(`✅ Vehicles updated: ${vehicles.length} records`);
+          break;
+          
+        case 'maintenanceOrders':
+          const maintenanceOrders = await fetchMaintenanceOrdersOnly();
+          updatedData = { maintenanceOrders };
+          console.log(`✅ Maintenance orders updated: ${maintenanceOrders.length} records`);
+          break;
+          
+        case 'vehicleSchedules':
+          const vehicleSchedules = await fetchVehicleSchedulesOnly();
+          updatedData = { vehicleSchedules };
+          console.log(`✅ Vehicle schedules updated: ${vehicleSchedules.length} records`);
+          break;
+          
+        case 'summary':
+          const summary = await fetchDashboardSummaryOnly();
+          updatedData = { summary };
+          console.log(`✅ Dashboard summary updated`);
+          break;
+          
+        default:
+          console.warn(`Unknown entity type: ${entityType}. Falling back to full refresh.`);
+          await fetchData();
+          return;
+      }
+      
+      // Merge the updated data with existing data
+      setData(prevData => ({
+        ...prevData,
+        ...updatedData
+      }));
+      
+      console.log(`=== GRANULAR REFRESH END (${entityType.toUpperCase()}) ===`);
+      
+    } catch (err) {
+      console.error(`Error in refreshData for ${entityType}:`, err);
+      setError(err instanceof Error ? err.message : `An error occurred while refreshing ${entityType} data`);
+    }
   };
 
   useEffect(() => {

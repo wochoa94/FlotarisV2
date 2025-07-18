@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GanttItem, GanttVehicle, Vehicle, Driver, MaintenanceOrder, VehicleSchedule } from '../types';
-import { vehicleScheduleService, maintenanceOrderService, fetchFleetData } from '../services/apiService';
+import { vehicleScheduleService, maintenanceOrderService, fetchDriversOnly, fetchVehiclesOnly } from '../services/apiService';
 import { format, addDays } from 'date-fns';
 
 interface UseGanttChartDataReturn {
@@ -47,12 +47,14 @@ export function useGanttChartData(
 
       // Fetch data in parallel
       const [
-        fleetDataResponse,
+        vehicles,
+        drivers,
         vehicleSchedulesResponse,
         maintenanceOrdersResponse
       ] = await Promise.all([
-        // Fetch all vehicles and drivers (needed for display regardless of date range)
-        fetchFleetData(),
+        // Fetch vehicles and drivers separately for better performance
+        fetchVehiclesOnly(),
+        fetchDriversOnly(),
         // Fetch vehicle schedules with date range filter
         vehicleScheduleService.fetchPaginatedVehicleSchedules({
           startDate: startDateStr,
@@ -67,7 +69,6 @@ export function useGanttChartData(
         })
       ]);
 
-      const { vehicles, drivers } = fleetDataResponse;
       const { vehicleSchedules } = vehicleSchedulesResponse;
       const { maintenanceOrders } = maintenanceOrdersResponse;
 

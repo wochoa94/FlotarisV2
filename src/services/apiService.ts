@@ -79,6 +79,56 @@ export async function fetchFleetData(): Promise<FleetData> {
   }
 }
 
+// Granular Fleet Data Services for targeted refreshes
+export async function fetchDriversOnly(): Promise<Driver[]> {
+  try {
+    const data = await apiCall('/drivers');
+    return data.drivers || data; // Handle both array and object responses
+  } catch (error) {
+    console.error('Error fetching drivers only:', error);
+    throw error;
+  }
+}
+
+export async function fetchVehiclesOnly(): Promise<Vehicle[]> {
+  try {
+    const data = await apiCall('/vehicles');
+    return data.vehicles || data; // Handle both array and object responses
+  } catch (error) {
+    console.error('Error fetching vehicles only:', error);
+    throw error;
+  }
+}
+
+export async function fetchMaintenanceOrdersOnly(): Promise<MaintenanceOrder[]> {
+  try {
+    const data = await apiCall('/maintenance-orders');
+    return data.maintenanceOrders || data; // Handle both array and object responses
+  } catch (error) {
+    console.error('Error fetching maintenance orders only:', error);
+    throw error;
+  }
+}
+
+export async function fetchVehicleSchedulesOnly(): Promise<VehicleSchedule[]> {
+  try {
+    const data = await apiCall('/vehicle-schedules');
+    return data.vehicleSchedules || data; // Handle both array and object responses
+  } catch (error) {
+    console.error('Error fetching vehicle schedules only:', error);
+    throw error;
+  }
+}
+
+export async function fetchDashboardSummaryOnly() {
+  try {
+    const data = await apiCall('/fleet/summary');
+    return data.summary || data; // Handle both nested and direct responses
+  } catch (error) {
+    console.error('Error fetching dashboard summary only:', error);
+    throw error;
+  }
+}
 // Authentication Service
 export const authService = {
   async signIn(email: string, password: string): Promise<{ user?: User; error?: Error }> {

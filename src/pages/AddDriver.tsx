@@ -130,7 +130,7 @@ export function AddDriver() {
       setSuccessMessage(`Driver "${driverData.name}" added successfully!`);
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('drivers');
       
       // Redirect to drivers page after a short delay
       setTimeout(() => {

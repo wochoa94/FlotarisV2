@@ -188,7 +188,7 @@ export function AddVehicleSchedule() {
       setSuccessMessage('Vehicle schedule created successfully!');
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('vehicleSchedules');
       
       // Redirect to vehicle schedules page after a short delay
       setTimeout(() => {

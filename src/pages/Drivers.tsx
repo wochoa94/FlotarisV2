@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Edit, Plus, Search, Filter, User, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useFleetData } from '../hooks/useFleetData';
 import { useDriversData } from '../hooks/useDriversData';
 import { driverService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export function Drivers() {
   const { user } = useAuth();
+  const { refreshData: refreshFleetData } = useFleetData();
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   const {
@@ -57,6 +59,7 @@ export function Drivers() {
     try {
       await driverService.deleteDriver(deleteModal.driver.id);
       await refreshData();
+      await refreshFleetData('drivers'); // Update global fleet data
       setDeleteModal({ isOpen: false, driver: null });
     } catch (error) {
       console.error('Error deleting driver:', error);

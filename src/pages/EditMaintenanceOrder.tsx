@@ -155,7 +155,7 @@ export function EditMaintenanceOrder() {
       setSuccessMessage('Maintenance order updated successfully!');
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('maintenanceOrders');
       
       // Redirect to order detail page after a short delay
       setTimeout(() => {

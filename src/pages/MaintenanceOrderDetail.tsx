@@ -133,7 +133,7 @@ export function MaintenanceOrderDetail() {
       setSuccessMessage('Maintenance order authorized successfully! Status changed to Scheduled.');
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('maintenanceOrders');
       
       // Close modal
       setShowAuthorizeModal(false);

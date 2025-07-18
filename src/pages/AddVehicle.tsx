@@ -130,7 +130,7 @@ export function AddVehicle() {
       setSuccessMessage('Vehicle added successfully!');
       
       // Refresh fleet data
-      await refreshData();
+      await refreshData('vehicles');
       
       // Redirect to vehicles page after a short delay
       setTimeout(() => {
