@@ -91,7 +91,6 @@ export function VehicleSchedules() {
     setItemsPerPage,
     clearAllFilters,
     refreshData,
-    refreshData,
     vehicleScheduleSummary,
   } = useVehicleSchedulesData();
 
@@ -226,12 +225,7 @@ export function VehicleSchedules() {
       setSuccessMessage('Schedule deleted successfully!');
 
       // 4. Refresh data to update the list
-      if (typeof refreshData === 'function') {
-        await refreshData();
-      } else {
-        console.error('refreshData is not a function. Reloading page as fallback.');
-        window.location.reload();
-      }
+      await refreshData();
 
     } catch (error) {
       console.error('Error deleting vehicle schedule:', error);
