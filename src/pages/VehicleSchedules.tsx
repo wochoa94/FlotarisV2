@@ -94,8 +94,6 @@ export function VehicleSchedules() {
     vehicleScheduleSummary,
   } = useVehicleSchedulesData();
 
-  console.log('Value of refreshData from useVehicleSchedulesData:', refreshData); // Add this line
-
   // Modal state for notes
   const [showNotesModal, setShowNotesModal] = useState<string | null>(null);
 
@@ -227,12 +225,7 @@ export function VehicleSchedules() {
       setSuccessMessage('Schedule deleted successfully!');
 
       // 4. Refresh data to update the list
-      if (typeof refreshData === 'function') { // Add this check
-        await refreshData();
-      } else {
-        console.warn('refreshData is not a function. Data might not be refreshed automatically.');
-        // Optionally, you could prompt the user to refresh the page manually here
-      }
+      await refreshData();
 
     } catch (error) {
       console.error('Error deleting vehicle schedule:', error);

@@ -81,6 +81,9 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vehicleScheduleSummary, setVehicleScheduleSummary] = useState<VehicleScheduleSummary | null>(null);
+  
+  // Refresh trigger mechanism to force data re-fetch
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -161,7 +164,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   // Effect to fetch data when dependencies change
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, refreshTrigger]);
 
   // Effect to update URL when state changes
   useEffect(() => {
@@ -219,8 +222,9 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   }, []);
 
   const refreshData = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
+    // Increment refresh trigger to force data re-fetch
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   return {
     // Data
