@@ -23,7 +23,7 @@ export function formatDate(dateString: string): string {
  * @returns Today's date string in Guatemala timezone
  */
 export function getTodayString(): string {
-  const nowInGuatemala = utcToZonedTime(new Date(), GUATEMALA_TIMEZONE);
+  const nowInGuatemala = toZonedTime(new Date(), GUATEMALA_TIMEZONE);
   return formatInTimeZone(nowInGuatemala, GUATEMALA_TIMEZONE, 'yyyy-MM-dd');
 }
 
@@ -47,7 +47,7 @@ export function getDaysBetween(startDate: string, endDate: string): number {
  * @returns Today's date at start of day in Guatemala timezone
  */
 export function getToday(): Date {
-  const nowInGuatemala = utcToZonedTime(new Date(), GUATEMALA_TIMEZONE);
+  const nowInGuatemala = toZonedTime(new Date(), GUATEMALA_TIMEZONE);
   return startOfDay(nowInGuatemala);
 }
 
@@ -115,13 +115,13 @@ export function parseDate(dateString: string): Date {
     // Create a Date object representing midnight of that date in Guatemala timezone
     const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
     // Convert to Guatemala timezone and ensure it's at start of day
-    const zonedDate = utcToZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
+    const zonedDate = toZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
     return startOfDay(zonedDate);
   }
   
   // For ISO timestamp strings, parse as UTC and then convert to Guatemala timezone
   const date = new Date(dateString);
-  const zonedDate = utcToZonedTime(date, GUATEMALA_TIMEZONE);
+  const zonedDate = toZonedTime(date, GUATEMALA_TIMEZONE);
   return startOfDay(zonedDate);
 }
 
@@ -138,13 +138,13 @@ export function parseDateEnd(dateString: string): Date {
     // Create a Date object representing midnight of that date in Guatemala timezone
     const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
     // Convert to Guatemala timezone and ensure it's at end of day
-    const zonedDate = utcToZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
+    const zonedDate = toZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
     return endOfDay(zonedDate);
   }
   
   // For ISO timestamp strings, parse as UTC and then convert to Guatemala timezone
   const date = new Date(dateString);
-  const zonedDate = utcToZonedTime(date, GUATEMALA_TIMEZONE);
+  const zonedDate = toZonedTime(date, GUATEMALA_TIMEZONE);
   return endOfDay(zonedDate);
 }
 
@@ -171,6 +171,6 @@ export function convertLocalDateToUtcMidnight(localDateString: string): string {
   // Create a Date object in Guatemala timezone
   const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
   // Convert this Guatemala-local date to UTC
-  const utcDate = zonedTimeToUtc(dateInGuatemala, GUATEMALA_TIMEZONE);
+  const utcDate = fromZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
   return utcDate.toISOString(); // Return as ISO string (which is UTC)
 }
