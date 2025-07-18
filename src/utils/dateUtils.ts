@@ -4,7 +4,7 @@
  */
 
 import { addDays, format, differenceInDays, startOfDay, endOfDay } from 'date-fns';
-import { utcToZonedTime, zonedTimeToUtc, formatInTimeZone } from 'date-fns-tz';
+import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { GUATEMALA_TIMEZONE } from '../lib/constants';
 
 /**
