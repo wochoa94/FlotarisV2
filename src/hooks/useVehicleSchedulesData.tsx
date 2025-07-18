@@ -222,7 +222,6 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   }, []);
 
   const refreshData = useCallback(async () => {
-    // Increment refresh trigger to force data re-fetch
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
@@ -252,6 +251,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
+    refreshData,
 
     // Summary data
     vehicleScheduleSummary,
