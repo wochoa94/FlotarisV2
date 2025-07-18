@@ -115,7 +115,7 @@ export function AddVehicleSchedule() {
           
           if (startDate < today) {
             error = 'Start date cannot be in the past';
-          } else if (endDate <= startDate) {
+          } else if (endDate < startDate) {
             error = 'End date must be after start date';
           }
         }
