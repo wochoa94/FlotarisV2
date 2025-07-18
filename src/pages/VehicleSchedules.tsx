@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Calendar, Truck, User, FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Filter, Calendar, Truck, User, FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useVehicleSchedulesData } from '../hooks/useVehicleSchedulesData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -50,6 +50,19 @@ export function VehicleSchedules() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showFilterModal, setShowFilterModal] = useState(false);
+  
+  // Add state for success message
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Auto-clear messages after 5 seconds
+  React.useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
   
   const {
     // Data
@@ -198,14 +211,29 @@ export function VehicleSchedules() {
     if (!deleteModal.schedule) return;
 
     setIsDeleting(true);
+    const scheduleToDeleteId = deleteModal.schedule.id; // Capture ID before clearing modal
+
     try {
-      await vehicleScheduleService.deleteVehicleSchedule(deleteModal.schedule.id);
-      await refreshData();
+      // 1. Perform the delete operation
+      await vehicleScheduleService.deleteVehicleSchedule(scheduleToDeleteId);
+
+      // 2. Immediately close the modal and reset deleting state
       setDeleteModal({ isOpen: false, schedule: null, isActiveSchedule: false });
+      setIsDeleting(false); // Reset here so the button is re-enabled if needed
+
+      // 3. Show success message
+      setSuccessMessage('Schedule deleted successfully!');
+
+      // 4. Refresh data to update the list
+      await refreshData();
+
     } catch (error) {
       console.error('Error deleting vehicle schedule:', error);
-      // You could add error handling here
+      // If delete fails, keep the modal open and show error
+      // For now, we'll just log the error and close the modal
+      setDeleteModal({ isOpen: false, schedule: null, isActiveSchedule: false });
     } finally {
+      // Ensure isDeleting is false even if an error occurred before it was reset
       setIsDeleting(false);
     }
   };
@@ -250,6 +278,28 @@ export function VehicleSchedules() {
 
   return (
     <div className="space-y-6">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="rounded-md bg-green-50 border border-green-200 p-4 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-5 w-5 text-green-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">{successMessage}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSuccessMessage('')}
+              className="text-green-400 hover:text-green-600 transition-colors duration-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
