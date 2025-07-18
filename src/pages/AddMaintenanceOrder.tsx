@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { maintenanceOrderService } from '../services/apiService';
-import { getTodayString } from '../utils/dateUtils';
+import { getTodayString, convertLocalDateToUtcMidnight } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface MaintenanceOrderFormData {
@@ -126,8 +126,8 @@ export function AddMaintenanceOrder() {
       const orderData = {
         vehicleId: formData.vehicleId,
         status: 'pending_authorization' as const,
-        startDate: formData.startDate,
-        estimatedCompletionDate: formData.estimatedCompletionDate,
+        startDate: convertLocalDateToUtcMidnight(formData.startDate), // Convert to UTC ISO
+        estimatedCompletionDate: convertLocalDateToUtcMidnight(formData.estimatedCompletionDate), // Convert to UTC ISO
         orderNumber: generateOrderNumber(),
         location: formData.location.trim() || null,
         type: formData.type.trim() || null,

@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, X, AlertCircle, CheckCircle, ChevronRight, ChevronLeft
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { vehicleScheduleService } from '../services/apiService';
-import { getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
+import { getTodayString, getDaysBetweenDates, parseDate, parseDateEnd, getToday, convertLocalDateToUtcMidnight } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface VehicleScheduleFormData {
@@ -111,8 +111,7 @@ export function AddVehicleSchedule() {
         } else {
           const startDate = new Date(formData.startDate);
           const endDate = new Date(formData.endDate);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // Set to start of today (midnight)
+          const today = getToday(); // Get today in Guatemala timezone
           
           if (startDate < today) {
             error = 'Start date cannot be in the past';
@@ -175,8 +174,8 @@ export function AddVehicleSchedule() {
       const scheduleData = {
         vehicleId: formData.vehicleId,
         driverId: formData.driverId,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
+        startDate: convertLocalDateToUtcMidnight(formData.startDate), // Convert to UTC ISO
+        endDate: convertLocalDateToUtcMidnight(formData.endDate),     // Convert to UTC ISO
         notes: formData.notes.trim() || null,
         status: 'scheduled' as const,
         userId: user?.id || '',

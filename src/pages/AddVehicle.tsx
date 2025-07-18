@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { vehicleService } from '../services/apiService';
+import { convertLocalDateToUtcMidnight } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface VehicleFormData {
@@ -114,7 +115,7 @@ export function AddVehicle() {
         year: formData.year ? Number(formData.year) : null,
         fuelType: formData.fuelType.trim() || null,
         mileage: formData.mileage ? Number(formData.mileage) : 0,
-        lastMaintenance: formData.lastMaintenance,
+        lastMaintenance: convertLocalDateToUtcMidnight(formData.lastMaintenance), // Convert to UTC ISO
         nextMaintenance: null,
         maintenanceCost: Number(formData.maintenanceCost),
         status: 'idle' as const, // Auto-assign idle status

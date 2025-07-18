@@ -1,45 +1,30 @@
 /**
  * Date utility functions for Gantt chart calculations and UI formatting
- * Updated to remove overlap validation logic (now handled by backend)
+ * Updated to handle all dates in Guatemala timezone (America/Guatemala)
  */
 
 import { addDays, format, differenceInDays, startOfDay, endOfDay } from 'date-fns';
+import { utcToZonedTime, zonedTimeToUtc, formatInTimeZone } from 'date-fns-tz';
+import { GUATEMALA_TIMEZONE } from '../lib/constants';
 
 /**
- * Formats a date string for display
+ * Formats a date string for display in Guatemala timezone
  * Handles both YYYY-MM-DD strings (from date type columns) and ISO timestamp strings
- * Ensures UTC dates are displayed as the intended local day.
  * @param dateString - Date string (YYYY-MM-DD or ISO format)
- * @returns Formatted date string
+ * @returns Formatted date string in Guatemala timezone
  */
 export function formatDate(dateString: string): string {
-  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-  
-  // For ISO timestamp strings, parse as UTC and then construct a local date for display
-  const date = new Date(dateString);
-  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  return localDateFromUTC.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  const date = new Date(dateString); // Parse the date string (handles both YYYY-MM-DD and ISO)
+  return formatInTimeZone(date, GUATEMALA_TIMEZONE, 'MMM dd, yyyy');
 }
 
 /**
- * Gets today's date in YYYY-MM-DD format based on local timezone
- * @returns Today's date string
+ * Gets today's date in YYYY-MM-DD format based on Guatemala timezone
+ * @returns Today's date string in Guatemala timezone
  */
 export function getTodayString(): string {
-  return format(new Date(), 'yyyy-MM-dd'); // Use date-fns format for local date
+  const nowInGuatemala = utcToZonedTime(new Date(), GUATEMALA_TIMEZONE);
+  return formatInTimeZone(nowInGuatemala, GUATEMALA_TIMEZONE, 'yyyy-MM-dd');
 }
 
 /**
@@ -58,11 +43,12 @@ export function getDaysBetween(startDate: string, endDate: string): number {
 // Gantt Chart specific date utilities
 
 /**
- * Gets today's date as a Date object
- * @returns Today's date
+ * Gets today's date as a Date object in Guatemala timezone
+ * @returns Today's date at start of day in Guatemala timezone
  */
 export function getToday(): Date {
-  return startOfDay(new Date());
+  const nowInGuatemala = utcToZonedTime(new Date(), GUATEMALA_TIMEZONE);
+  return startOfDay(nowInGuatemala);
 }
 
 /**
@@ -86,100 +72,105 @@ export function getDaysBetweenDates(startDate: Date, endDate: Date): number {
 }
 
 /**
- * Formats a date for display in the Gantt chart header
+ * Formats a date for display in the Gantt chart header in Guatemala timezone
  * @param date - Date to format
  * @returns Formatted date string
  */
 export function formatGanttDate(date: Date): string {
-  return format(date, 'MMM dd');
+  return formatInTimeZone(date, GUATEMALA_TIMEZONE, 'MMM dd');
 }
 
 /**
- * Formats a date for display in tooltips
+ * Formats a date for display in tooltips in Guatemala timezone
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
- * Ensures UTC dates are displayed as the intended local day.
  * @param dateString - Date string
- * @returns Formatted date string
+ * @returns Formatted date string in Guatemala timezone
  */
 export function formatTooltipDate(dateString: string): string {
-  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-    return format(date, 'MMM dd, yyyy');
-  }
-  
-  // For ISO timestamp strings, parse as UTC and then construct a local date for display
   const date = new Date(dateString);
-  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  return format(localDateFromUTC, 'MMM dd, yyyy');
+  return formatInTimeZone(date, GUATEMALA_TIMEZONE, 'MMM dd, yyyy');
 }
 
 /**
- * Checks if a date is today
+ * Checks if a date is today in Guatemala timezone
  * @param date - Date to check
- * @returns True if date is today
+ * @returns True if date is today in Guatemala timezone
  */
 export function isToday(date: Date): boolean {
-  const today = getToday();
-  return format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+  const todayInGuatemala = getToday();
+  return formatInTimeZone(date, GUATEMALA_TIMEZONE, 'yyyy-MM-dd') === 
+         formatInTimeZone(todayInGuatemala, GUATEMALA_TIMEZONE, 'yyyy-MM-dd');
 }
 
 /**
- * Converts a date string to a Date object at start of day
+ * Converts a date string to a Date object at start of day in Guatemala timezone
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
- * Ensures UTC dates are parsed to the intended local day.
  * @param dateString - Date string
- * @returns Date object
+ * @returns Date object representing start of day in Guatemala timezone
  */
 export function parseDate(dateString: string): Date {
-  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  // For YYYY-MM-DD format, create a Date object that represents that date in Guatemala timezone
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     const [year, month, day] = dateString.split('-').map(Number);
-    return startOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
+    // Create a Date object representing midnight of that date in Guatemala timezone
+    const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
+    // Convert to Guatemala timezone and ensure it's at start of day
+    const zonedDate = utcToZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
+    return startOfDay(zonedDate);
   }
   
-  // For ISO timestamp strings, parse as UTC and then construct a local date for calculations
+  // For ISO timestamp strings, parse as UTC and then convert to Guatemala timezone
   const date = new Date(dateString);
-  return startOfDay(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const zonedDate = utcToZonedTime(date, GUATEMALA_TIMEZONE);
+  return startOfDay(zonedDate);
 }
 
 /**
- * Converts a date string to a Date object at end of day
+ * Converts a date string to a Date object at end of day in Guatemala timezone
  * Handles both YYYY-MM-DD strings and ISO timestamp strings
- * Ensures UTC dates are parsed to the intended local day.
  * @param dateString - Date string
- * @returns Date object
+ * @returns Date object representing end of day in Guatemala timezone
  */
 export function parseDateEnd(dateString: string): Date {
-  // For YYYY-MM-DD format (from PostgreSQL date types), create date in local timezone
+  // For YYYY-MM-DD format, create a Date object that represents that date in Guatemala timezone
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     const [year, month, day] = dateString.split('-').map(Number);
-    return endOfDay(new Date(year, month - 1, day)); // month is 0-indexed in JavaScript
+    // Create a Date object representing midnight of that date in Guatemala timezone
+    const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
+    // Convert to Guatemala timezone and ensure it's at end of day
+    const zonedDate = utcToZonedTime(dateInGuatemala, GUATEMALA_TIMEZONE);
+    return endOfDay(zonedDate);
   }
   
-  // For ISO timestamp strings, parse as UTC and then construct a local date for calculations
+  // For ISO timestamp strings, parse as UTC and then convert to Guatemala timezone
   const date = new Date(dateString);
-  return endOfDay(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const zonedDate = utcToZonedTime(date, GUATEMALA_TIMEZONE);
+  return endOfDay(zonedDate);
 }
 
 /**
- * Formats a UTC date string to local YYYY-MM-DD for date inputs
- * Ensures UTC dates are displayed as the intended local day for input fields.
+ * Formats a UTC date string to Guatemala YYYY-MM-DD for date inputs
+ * Ensures UTC dates are displayed as the intended Guatemala day for input fields
  * @param utcDateString - UTC ISO date string
- * @returns Local YYYY-MM-DD string
+ * @returns Guatemala YYYY-MM-DD string
  */
 export function formatUtcDateForInput(utcDateString: string): string {
-  const date = new Date(utcDateString);
-  const localDateFromUTC = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  return format(localDateFromUTC, 'yyyy-MM-dd');
+  const date = new Date(utcDateString); // Parse as UTC
+  return formatInTimeZone(date, GUATEMALA_TIMEZONE, 'yyyy-MM-dd'); // Format in Guatemala timezone
 }
 
 /**
- * Converts a local YYYY-MM-DD date to UTC midnight for database storage
- * @param localDateString - Local YYYY-MM-DD string
- * @returns UTC ISO string with midnight time
+ * Converts a Guatemala YYYY-MM-DD date to UTC midnight for database storage
+ * Interprets the input as a date in Guatemala timezone and converts to UTC ISO
+ * @param localDateString - Guatemala YYYY-MM-DD string
+ * @returns UTC ISO string representing midnight in Guatemala timezone
  */
 export function convertLocalDateToUtcMidnight(localDateString: string): string {
-  return `${localDateString}T00:00:00Z`;
+  // Create a Date object representing midnight of localDateString in Guatemala timezone
+  const [year, month, day] = localDateString.split('-').map(Number);
+  // Create a Date object in Guatemala timezone
+  const dateInGuatemala = new Date(year, month - 1, day, 0, 0, 0);
+  // Convert this Guatemala-local date to UTC
+  const utcDate = zonedTimeToUtc(dateInGuatemala, GUATEMALA_TIMEZONE);
+  return utcDate.toISOString(); // Return as ISO string (which is UTC)
 }

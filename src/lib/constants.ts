@@ -1,0 +1,1 @@
+export const GUATEMALA_TIMEZONE = 'America/Guatemala';

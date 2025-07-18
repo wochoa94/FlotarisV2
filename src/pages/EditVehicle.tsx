@@ -4,6 +4,7 @@ import { ArrowLeft, Save, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { vehicleService } from '../services/apiService';
+import { convertLocalDateToUtcMidnight } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface EditVehicleFormData {
@@ -90,7 +91,7 @@ export function EditVehicle() {
       const updateData = {
         name: formData.name.trim(),
         licensePlate: formData.licensePlate.trim(),
-        lastMaintenance: formData.lastMaintenance,
+        lastMaintenance: convertLocalDateToUtcMidnight(formData.lastMaintenance), // Convert to UTC ISO
       };
 
       // Update via API service
