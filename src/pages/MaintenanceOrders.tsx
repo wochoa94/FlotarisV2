@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Plus, Search, Filter, Wrench, Calendar, Clock, DollarSign, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useMaintenanceOrdersData } from '../hooks/useMaintenanceOrdersData';
+import { useMaintenanceOrdersData } from '../features/maintenance-orders/hooks/useMaintenanceOrdersData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { MaintenanceOrder } from '../types';
 import { formatDate } from '../utils/dateUtils';
