@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar, Truck, Wrench, User, MapPin, FileText, AlertTriangle } from 'lucide-react';
-import { GanttItem, GanttVehicle } from '../../types';
+import { GanttItem, GanttVehicle } from '../../../types';
 import { 
   addDaysToDate, 
   getDaysBetweenDates, 
@@ -10,7 +10,7 @@ import {
   isToday,
   parseDate,
   parseDateEnd
-} from '../../utils/dateUtils';
+} from '../../../utils/dateUtils';
 
 interface GanttChartProps {
   vehicles: GanttVehicle[];

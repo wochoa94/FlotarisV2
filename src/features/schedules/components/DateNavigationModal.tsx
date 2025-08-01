@@ -1,10 +1,10 @@
 import React from 'react';
 import { X, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { addDaysToDate, formatGanttDate } from '../../utils/dateUtils';
-import { Button } from '../ui/Button';
-import { Label } from '../ui/Label';
-import { Input } from '../ui/Input';
+import { addDaysToDate, formatGanttDate } from '../../../utils/dateUtils';
+import { Button } from '../../../components/ui/Button';
+import { Label } from '../../../components/ui/Label';
+import { Input } from '../../../components/ui/Input';
 
 interface DateNavigationModalProps {
   isOpen: boolean;

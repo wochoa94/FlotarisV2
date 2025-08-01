@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GanttItem, GanttVehicle, Vehicle, Driver, MaintenanceOrder, VehicleSchedule } from '../types';
-import { vehicleScheduleService, maintenanceOrderService, fetchFleetData } from '../services/apiService';
+import { GanttItem, GanttVehicle, Vehicle, Driver, MaintenanceOrder, VehicleSchedule } from '../../../types';
+import { vehicleScheduleService, maintenanceOrderService, fetchFleetData } from '../../../services/apiService';
 import { format, addDays } from 'date-fns';
 
 interface UseGanttChartDataReturn {

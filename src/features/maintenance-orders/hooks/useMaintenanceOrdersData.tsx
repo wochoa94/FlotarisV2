@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { VehicleSchedule, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse, VehicleScheduleSummary } from '../types';
-import { vehicleScheduleService } from '../services/apiService';
+import { MaintenanceOrder, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary } from '../../../types';
+import { maintenanceOrderService } from '../../../services/apiService';
 
-type SortColumn = 'vehicleName' | 'driverName' | 'startDate' | 'endDate' | 'duration' | 'status';
+type SortColumn = 'orderNumber' | 'vehicleName' | 'startDate' | 'estimatedCompletionDate' | 'cost' | 'status';
 type SortDirection = 'asc' | 'desc';
 
-interface UseVehicleSchedulesDataReturn {
+interface UseMaintenanceOrdersDataReturn {
   // Data
-  vehicleSchedules: VehicleSchedule[];
+  maintenanceOrders: MaintenanceOrder[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
@@ -35,10 +35,10 @@ interface UseVehicleSchedulesDataReturn {
   refreshData: () => Promise<void>;
 
   // Summary data
-  vehicleScheduleSummary: VehicleScheduleSummary | null;
+  maintenanceOrderSummary: MaintenanceOrderSummary | null;
 }
 
-export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
+export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize state from URL parameters
@@ -46,11 +46,11 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     const search = searchParams.get('search') || '';
     const status = searchParams.getAll('status');
     // If no status filters are specified in URL, use backend's default filters
-    const defaultStatusFilters = status.length > 0 ? status : ['active', 'scheduled'];
+    const defaultStatusFilters = status.length > 0 ? status : ['active', 'scheduled', 'pending_authorization'];
     const sortBy = searchParams.get('sortBy') as SortColumn | null;
     const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'desc'; // Default to newest first
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '6', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
     
     return {
       search,
@@ -73,14 +73,14 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   const [itemsPerPage, setItemsPerPageState] = useState(initialState.limit);
   
   // Data state
-  const [vehicleSchedules, setVehicleSchedules] = useState<VehicleSchedule[]>([]);
+  const [maintenanceOrders, setMaintenanceOrders] = useState<MaintenanceOrder[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [vehicleScheduleSummary, setVehicleScheduleSummary] = useState<VehicleScheduleSummary | null>(null);
+  const [maintenanceOrderSummary, setMaintenanceOrderSummary] = useState<MaintenanceOrderSummary | null>(null);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -112,7 +112,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     if (sortBy) params.set('sortBy', sortBy);
     if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
-    if (itemsPerPage !== 6) params.set('limit', itemsPerPage.toString());
+    if (itemsPerPage !== 10) params.set('limit', itemsPerPage.toString());
     
     setSearchParams(params, { replace: true });
   }, [debouncedSearchTerm, statusFilters, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
@@ -123,7 +123,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     setError(null);
     
     try {
-      const queryParams: VehicleScheduleQueryParams = {
+      const queryParams: MaintenanceOrderQueryParams = {
         search: debouncedSearchTerm || undefined,
         status: statusFilters.length > 0 ? statusFilters : undefined,
         sortBy: sortBy || undefined,
@@ -133,26 +133,26 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
       };
 
       // Fetch both paginated data and summary concurrently
-      const [response, summaryResponse]: [PaginatedVehicleSchedulesResponse, VehicleScheduleSummary] = await Promise.all([
-        vehicleScheduleService.fetchPaginatedVehicleSchedules(queryParams),
-        vehicleScheduleService.fetchVehicleScheduleSummary()
+      const [response, summaryResponse]: [PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary] = await Promise.all([
+        maintenanceOrderService.fetchPaginatedMaintenanceOrders(queryParams),
+        maintenanceOrderService.fetchMaintenanceOrderSummary()
       ]);
       
-      setVehicleSchedules(response.vehicleSchedules);
+      setMaintenanceOrders(response.maintenanceOrders);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
-      setVehicleScheduleSummary(summaryResponse);
+      setMaintenanceOrderSummary(summaryResponse);
     } catch (err) {
-      console.error('Error fetching vehicle schedules:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch vehicle schedules');
-      setVehicleSchedules([]);
+      console.error('Error fetching maintenance orders:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch maintenance orders');
+      setMaintenanceOrders([]);
       setTotalCount(0);
       setTotalPages(0);
       setHasNextPage(false);
       setHasPreviousPage(false);
-      setVehicleScheduleSummary(null);
+      setMaintenanceOrderSummary(null);
     } finally {
       setLoading(false);
     }
@@ -185,7 +185,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
   }, []);
 
   const clearStatusFilters = useCallback(() => {
-    setStatusFilters(['active', 'scheduled']); // Reset to default filters
+    setStatusFilters([]);
     setCurrentPageState(1);
   }, []);
 
@@ -212,7 +212,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
 
   const clearAllFilters = useCallback(() => {
     setSearchTermState('');
-    setStatusFilters(['active', 'scheduled']); // Reset to default filters
+    setStatusFilters([]);
     setSortByState('startDate');
     setSortOrderState('desc');
     setCurrentPageState(1);
@@ -224,7 +224,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
 
   return {
     // Data
-    vehicleSchedules,
+    maintenanceOrders,
     totalCount,
     totalPages,
     currentPage,
@@ -248,8 +248,9 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
+    refreshData,
 
     // Summary data
-    vehicleScheduleSummary,
+    maintenanceOrderSummary,
   };
 }

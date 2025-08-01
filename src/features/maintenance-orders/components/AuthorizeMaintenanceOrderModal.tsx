@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, DollarSign } from 'lucide-react';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { MaintenanceOrder } from '../../types';
-import { Button } from '../ui/Button';
-import { Label } from '../ui/Label';
-import { Input } from '../ui/Input';
-import { Alert } from '../ui/Alert';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { MaintenanceOrder } from '../../../types';
+import { Button } from '../../../components/ui/Button';
+import { Label } from '../../../components/ui/Label';
+import { Input } from '../../../components/ui/Input';
+import { Alert } from '../../../components/ui/Alert';
 
 interface AuthorizeMaintenanceOrderModalProps {
   isOpen: boolean;
@@ -232,7 +232,7 @@ export function AuthorizeMaintenanceOrderModal({
               >
                 {isLoading ? (
                   <>
-                    <LoadingSpinner size="sm\" className="text-white mr-2" />
+                    <LoadingSpinner size="sm" className="text-white mr-2" />
                     Authorizing...
                   </>
                 ) : (
