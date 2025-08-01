@@ -6,6 +6,9 @@ import { useFleetData } from '../hooks/useFleetData';
 import { vehicleScheduleService } from '../services/apiService';
 import { getTodayString, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Label } from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
 
 interface VehicleScheduleFormData {
   vehicleId: string;
@@ -388,16 +391,16 @@ export function AddVehicleSchedule() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Step 1: Select Vehicle</h3>
                 <div>
-                  <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label htmlFor="vehicleId">
                     Vehicle *
-                  </label>
-                  <select
+                  </Label>
+                  <Input
+                    as="select"
                     id="vehicleId"
                     name="vehicleId"
                     value={formData.vehicleId}
                     onChange={handleInputChange}
                     required
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">Select a vehicle</option>
                     {availableVehicles.map((vehicle) => (
@@ -405,7 +408,7 @@ export function AddVehicleSchedule() {
                         {vehicle.name} - {vehicle.make} {vehicle.model} {vehicle.year} ({vehicle.status})
                       </option>
                     ))}
-                  </select>
+                  </Input>
                   {availableVehicles.length === 0 && (
                     <p className="mt-1 text-sm text-red-600">No vehicles available for scheduling</p>
                   )}
@@ -457,10 +460,10 @@ export function AddVehicleSchedule() {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Step 2: Select Date Range</h3>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label htmlFor="startDate">
                       Start Date *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="date"
                       id="startDate"
                       name="startDate"
@@ -468,15 +471,14 @@ export function AddVehicleSchedule() {
                       onChange={handleInputChange}
                       required
                       min={getTodayString()}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label htmlFor="endDate">
                       End Date *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="date"
                       id="endDate"
                       name="endDate"
@@ -484,7 +486,6 @@ export function AddVehicleSchedule() {
                       onChange={handleInputChange}
                       required
                       min={formData.startDate || getTodayString()}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -514,16 +515,16 @@ export function AddVehicleSchedule() {
                 
                 {/* Driver Selection */}
                 <div className="mb-6">
-                  <label htmlFor="driverId" className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label htmlFor="driverId">
                     Driver *
-                  </label>
-                  <select
+                  </Label>
+                  <Input
+                    as="select"
                     id="driverId"
                     name="driverId"
                     value={formData.driverId}
                     onChange={handleInputChange}
                     required
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">Select a driver</option>
                     {data.drivers.map((driver) => (
@@ -531,7 +532,7 @@ export function AddVehicleSchedule() {
                         {driver.name} - {driver.email}
                       </option>
                     ))}
-                  </select>
+                  </Input>
                 </div>
                 
                 {selectedDriver && (
@@ -587,17 +588,17 @@ export function AddVehicleSchedule() {
                 
                 {/* Notes */}
                 <div>
-                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label htmlFor="notes">
                     Notes (Optional)
-                  </label>
-                  <textarea
+                  </Label>
+                  <Input
+                    as="textarea"
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleInputChange}
                     onKeyDown={handleNotesKeyDown}
                     rows={4}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Add any additional notes or special instructions for this schedule..."
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -612,41 +613,42 @@ export function AddVehicleSchedule() {
           <div className="mt-6 flex items-center justify-between">
             <div>
               {currentStep > 1 && (
-                <button
+                <Button
                   type="button"
                   onClick={handleBack}
                   disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  variant="secondary"
                 >
                   <ChevronLeft className="h-4 w-4 mr-2" />
                   Back
-                </button>
+                </Button>
               )}
             </div>
             
             <div className="flex items-center space-x-3">
               <Link
                 to="/vehicle-schedules"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                className="btn-secondary"
               >
                 Cancel
               </Link>
               
               {currentStep < 3 ? (
-                <button
+                <Button
                   type="button"
                   onClick={handleNext}
                   disabled={isLoading || !steps[currentStep - 1]?.unlocked}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  variant="primary"
                 >
                   Next
                   <ChevronRight className="h-4 w-4 ml-2" />
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading || availableVehicles.length === 0}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  variant="primary"
+                  className="bg-green-600 hover:bg-green-700 focus:ring-green-500"
                 >
                   {isLoading ? (
                     <>
@@ -659,7 +661,7 @@ export function AddVehicleSchedule() {
                       Create Schedule
                     </>
                   )}
-                </button>
+                </Button>
               )}
             </div>
           </div>

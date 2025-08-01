@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, DollarSign } from 'lucide-react';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { MaintenanceOrder } from '../../types';
+import { Button } from '../ui/Button';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
 
 interface AuthorizeMaintenanceOrderModalProps {
   isOpen: boolean;
@@ -149,14 +152,14 @@ export function AuthorizeMaintenanceOrderModal({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Cost */}
             <div>
-              <label htmlFor="cost" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="cost">
                 Authorized Cost *
-              </label>
+              </Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <DollarSign className="h-4 w-4 text-gray-400" />
                 </div>
-                <input
+                <Input
                   type="number"
                   id="cost"
                   name="cost"
@@ -166,7 +169,7 @@ export function AuthorizeMaintenanceOrderModal({
                   min="0"
                   step="0.01"
                   disabled={isLoading}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="pl-10 focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="0.00"
                 />
               </div>
@@ -174,10 +177,11 @@ export function AuthorizeMaintenanceOrderModal({
 
             {/* Quotation Details */}
             <div>
-              <label htmlFor="quotationDetails" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="quotationDetails">
                 Quotation Details *
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="quotationDetails"
                 name="quotationDetails"
                 value={formData.quotationDetails}
@@ -185,42 +189,45 @@ export function AuthorizeMaintenanceOrderModal({
                 required
                 rows={4}
                 disabled={isLoading}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Detailed breakdown of authorized costs, parts, labor, etc..."
               />
             </div>
 
             {/* Comments */}
             <div>
-              <label htmlFor="comments" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="comments">
                 Authorization Comments
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="comments"
                 name="comments"
                 value={formData.comments}
                 onChange={handleInputChange}
                 rows={3}
                 disabled={isLoading}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Additional authorization notes or special instructions..."
               />
             </div>
 
             {/* Form Actions */}
             <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
-              <button
+              <Button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                variant="secondary"
+                className="focus:ring-green-500"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                variant="primary"
+                className="bg-green-600 hover:bg-green-700 focus:ring-green-500"
               >
                 {isLoading ? (
                   <>
@@ -233,7 +240,7 @@ export function AuthorizeMaintenanceOrderModal({
                     Authorize Order
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

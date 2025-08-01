@@ -5,6 +5,9 @@ import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { vehicleService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Label } from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
 
 interface EditVehicleFormData {
   name: string;
@@ -253,51 +256,48 @@ export function EditVehicle() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* Vehicle Name */}
             <div className="sm:col-span-2">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="name">
                 Vehicle Name *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter vehicle name"
               />
             </div>
 
             {/* License Plate */}
             <div>
-              <label htmlFor="licensePlate" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="licensePlate">
                 License Plate *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 id="licensePlate"
                 name="licensePlate"
                 value={formData.licensePlate}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter license plate"
               />
             </div>
 
             {/* Last Maintenance */}
             <div>
-              <label htmlFor="lastMaintenance" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="lastMaintenance">
                 Last Maintenance Date *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="date"
                 id="lastMaintenance"
                 name="lastMaintenance"
                 value={formData.lastMaintenance}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
@@ -337,14 +337,14 @@ export function EditVehicle() {
           <div className="mt-6 flex items-center justify-end space-x-3">
             <Link
               to={`/vehicles/${vehicle.id}`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="btn-secondary"
             >
               Cancel
             </Link>
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              variant="primary"
             >
               {isLoading ? (
                 <>
@@ -357,7 +357,7 @@ export function EditVehicle() {
                   Update Vehicle
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

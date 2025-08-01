@@ -6,6 +6,9 @@ import { useFleetData } from '../hooks/useFleetData';
 import { maintenanceOrderService } from '../services/apiService';
 import { getTodayString } from '../utils/dateUtils';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Label } from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
 
 interface MaintenanceOrderFormData {
   vehicleId: string;
@@ -256,16 +259,16 @@ export function AddMaintenanceOrder() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* Vehicle Selection */}
             <div className="sm:col-span-2">
-              <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="vehicleId">
                 Vehicle *
-              </label>
-              <select
+              </Label>
+              <Input
+                as="select"
                 id="vehicleId"
                 name="vehicleId"
                 value={formData.vehicleId}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">Select a vehicle</option>
                 {availableVehicles.map((vehicle) => (
@@ -273,7 +276,7 @@ export function AddMaintenanceOrder() {
                     {vehicle.name} - {vehicle.make} {vehicle.model} {vehicle.year}
                   </option>
                 ))}
-              </select>
+              </Input>
               {availableVehicles.length === 0 && (
                 <p className="mt-1 text-sm text-red-600">No vehicles available for maintenance</p>
               )}
@@ -284,27 +287,27 @@ export function AddMaintenanceOrder() {
 
             {/* Service Description */}
             <div className="sm:col-span-2">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="description">
                 Service Description *
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Describe the maintenance work to be performed..."
               />
             </div>
 
             {/* Start Date */}
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="startDate">
                 Start Date *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="date"
                 id="startDate"
                 name="startDate"
@@ -312,16 +315,15 @@ export function AddMaintenanceOrder() {
                 onChange={handleInputChange}
                 required
                 min={getTodayString()}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
 
             {/* Estimated Completion Date */}
             <div>
-              <label htmlFor="estimatedCompletionDate" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="estimatedCompletionDate">
                 Estimated Completion Date *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="date"
                 id="estimatedCompletionDate"
                 name="estimatedCompletionDate"
@@ -329,37 +331,35 @@ export function AddMaintenanceOrder() {
                 onChange={handleInputChange}
                 required
                 min={formData.startDate || getTodayString()}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
 
             {/* Location */}
             <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="location">
                 Location
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 id="location"
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="e.g., Main Garage, Service Center A"
               />
             </div>
 
             {/* Type */}
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="type">
                 Maintenance Type
-              </label>
-              <select
+              </Label>
+              <Input
+                as="select"
                 id="type"
                 name="type"
                 value={formData.type}
                 onChange={handleInputChange}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">Select type</option>
                 <option value="Preventive">Preventive</option>
@@ -368,7 +368,7 @@ export function AddMaintenanceOrder() {
                 <option value="Inspection">Inspection</option>
                 <option value="Repair">Repair</option>
                 <option value="Service">Service</option>
-              </select>
+              </Input>
             </div>
 
             {/* Urgent Checkbox */}
@@ -393,10 +393,10 @@ export function AddMaintenanceOrder() {
 
             {/* Cost */}
             <div>
-              <label htmlFor="cost" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="cost">
                 Estimated Cost *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="number"
                 id="cost"
                 name="cost"
@@ -405,39 +405,38 @@ export function AddMaintenanceOrder() {
                 required
                 min="0"
                 step="0.01"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="0.00"
               />
             </div>
 
             {/* Quotation Details */}
             <div className="sm:col-span-2">
-              <label htmlFor="quotationDetails" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="quotationDetails">
                 Quotation Details
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="quotationDetails"
                 name="quotationDetails"
                 value={formData.quotationDetails}
                 onChange={handleInputChange}
                 rows={3}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Detailed breakdown of costs, parts, labor, etc..."
               />
             </div>
 
             {/* Comments */}
             <div className="sm:col-span-2">
-              <label htmlFor="comments" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="comments">
                 Comments
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="comments"
                 name="comments"
                 value={formData.comments}
                 onChange={handleInputChange}
                 rows={3}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Additional notes or special instructions..."
               />
             </div>
@@ -447,14 +446,14 @@ export function AddMaintenanceOrder() {
           <div className="mt-6 flex items-center justify-end space-x-3">
             <Link
               to="/maintenance-orders"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="btn-secondary"
             >
               Cancel
             </Link>
-            <button
+            <Button
               type="submit"
               disabled={isLoading || availableVehicles.length === 0}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              variant="primary"
             >
               {isLoading ? (
                 <>
@@ -467,7 +466,7 @@ export function AddMaintenanceOrder() {
                   Create Maintenance Order
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

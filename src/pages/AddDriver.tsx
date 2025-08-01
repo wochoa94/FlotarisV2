@@ -5,6 +5,9 @@ import { useAuth } from '../hooks/useAuth';
 import { useFleetData } from '../hooks/useFleetData';
 import { driverService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Label } from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
 
 interface DriverFormData {
   name: string;
@@ -240,21 +243,21 @@ export function AddDriver() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* Driver Name */}
             <div className="sm:col-span-2">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="name">
                 Full Name *
-              </label>
+              </Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-4 w-4 text-gray-400" />
                 </div>
-                <input
+                <Input
                   type="text"
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="pl-10"
                   placeholder="Enter driver's full name"
                 />
               </div>
@@ -262,17 +265,16 @@ export function AddDriver() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="email">
                 Email Address *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="driver@example.com"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -282,10 +284,10 @@ export function AddDriver() {
 
             {/* Age */}
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="age">
                 Age *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="number"
                 id="age"
                 name="age"
@@ -294,7 +296,6 @@ export function AddDriver() {
                 required
                 min="18"
                 max="100"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="25"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -304,10 +305,10 @@ export function AddDriver() {
 
             {/* ID Number */}
             <div>
-              <label htmlFor="idNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="idNumber">
                 ID Number *
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 id="idNumber"
                 name="idNumber"
@@ -315,7 +316,7 @@ export function AddDriver() {
                 onChange={handleInputChange}
                 required
                 maxLength={20}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono"
+                className="font-mono"
                 placeholder="ABC123456"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -325,17 +326,17 @@ export function AddDriver() {
 
             {/* Address */}
             <div className="sm:col-span-2">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="address">
                 Address *
-              </label>
-              <textarea
+              </Label>
+              <Input
+                as="textarea"
                 id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter complete address including city, state, and postal code"
               />
             </div>
@@ -365,14 +366,14 @@ export function AddDriver() {
           <div className="mt-6 flex items-center justify-end space-x-3">
             <Link
               to="/drivers"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="btn-secondary"
             >
               Cancel
             </Link>
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              variant="primary"
             >
               {isLoading ? (
                 <>
@@ -385,7 +386,7 @@ export function AddDriver() {
                   Add Driver
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

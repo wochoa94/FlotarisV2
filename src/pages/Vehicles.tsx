@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useVehiclesData } from '../hooks/useVehiclesData';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
 
 export function Vehicles() {
   const { user } = useAuth();
@@ -125,9 +126,9 @@ export function Vehicles() {
         </div>
         <div className="flex items-center space-x-3">
           {/* Filter Button */}
-          <button
+          <Button
             onClick={() => setShowFilterModal(true)}
-            className="btn-secondary"
+            variant="secondary"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -136,7 +137,7 @@ export function Vehicles() {
                 Active
               </span>
             )}
-          </button>
+          </Button>
           
           {/* Add Vehicle Button */}
           {user?.isAdmin && (
@@ -235,21 +236,22 @@ export function Vehicles() {
               <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
                 <div>
                   {(searchTerm || statusFilters.length > 0 || unassignedFilter) && (
-                    <button
+                    <Button
                       onClick={handleClearAllFilters}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      variant="secondary"
+                      className="px-3 py-2"
                     >
                       <X className="h-4 w-4 mr-2" />
                       Clear All Filters
-                    </button>
+                    </Button>
                   )}
                 </div>
-                <button
+                <Button
                   onClick={() => setShowFilterModal(false)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  variant="primary"
                 >
                   Apply Filters
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -427,12 +429,12 @@ export function Vehicles() {
                  'No vehicles match your filters' : 'No vehicles found'}
               </div>
               {!loading && (searchTerm || statusFilters.length > 0 || unassignedFilter) && (
-                <button
+                <Button
                   onClick={clearAllFilters}
-                  className="btn-secondary"
+                  variant="secondary"
                 >
                   Clear all filters
-                </button>
+                </Button>
               )}
             </div>
           )}

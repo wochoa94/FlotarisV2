@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useDriversData } from '../hooks/useDriversData';
 import { driverService } from '../services/apiService';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
 
 export function Drivers() {
   const { user } = useAuth();
@@ -150,9 +151,9 @@ export function Drivers() {
         </div>
         <div className="flex items-center space-x-3">
           {/* Filter Button */}
-          <button
+          <Button
             onClick={() => setShowFilterModal(true)}
-            className="btn-secondary"
+            variant="secondary"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -161,7 +162,7 @@ export function Drivers() {
                 Active
               </span>
             )}
-          </button>
+          </Button>
           
           {/* Add Driver Button */}
           {user?.isAdmin && (
@@ -242,21 +243,22 @@ export function Drivers() {
               <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
                 <div>
                   {(searchTerm || emailSearchTerm) && (
-                    <button
+                    <Button
                       onClick={handleClearAllFilters}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      variant="secondary"
+                      className="px-3 py-2"
                     >
                       <X className="h-4 w-4 mr-2" />
                       Clear All Filters
-                    </button>
+                    </Button>
                   )}
                 </div>
-                <button
+                <Button
                   onClick={() => setShowFilterModal(false)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  variant="primary"
                 >
                   Apply Filters
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -449,7 +451,7 @@ export function Drivers() {
               {!loading && !searchTerm && !emailSearchTerm && user?.isAdmin && (
                 <Link
                   to="/drivers/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="btn-primary"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Driver
@@ -553,17 +555,17 @@ export function Drivers() {
               </div>
               
               <div className="flex items-center justify-end space-x-3">
-                <button
+                <Button
                   onClick={() => setDeleteModal({ isOpen: false, driver: null })}
                   disabled={isDeleting}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  variant="secondary"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={confirmDeleteDriver}
                   disabled={isDeleting}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  variant="danger"
                 >
                   {isDeleting ? (
                     <>
@@ -576,7 +578,7 @@ export function Drivers() {
                       Confirm Delete
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
