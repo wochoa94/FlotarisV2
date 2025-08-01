@@ -5,6 +5,7 @@ import { MaintenanceOrder } from '../../types';
 import { Button } from '../ui/Button';
 import { Label } from '../ui/Label';
 import { Input } from '../ui/Input';
+import { Alert } from '../ui/Alert';
 
 interface AuthorizeMaintenanceOrderModalProps {
   isOpen: boolean;

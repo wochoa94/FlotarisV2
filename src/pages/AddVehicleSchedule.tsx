@@ -9,6 +9,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Label } from '../components/ui/Label';
 import { Input } from '../components/ui/Input';
+import { Alert } from '../components/ui/Alert';
 
 interface VehicleScheduleFormData {
   vehicleId: string;

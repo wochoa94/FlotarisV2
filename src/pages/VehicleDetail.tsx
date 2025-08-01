@@ -201,7 +201,10 @@ export function VehicleDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Status</dt>
                   <dd className="mt-1">
-                    <StatusBadge status={vehicle.status} />
+                    <Badge 
+                      type={vehicle.status === 'active' ? 'green' : vehicle.status === 'maintenance' ? 'orange' : 'red'} 
+                      label={vehicle.status === 'active' ? 'Active' : vehicle.status === 'maintenance' ? 'Maintenance' : 'Idle'} 
+                    />
                   </dd>
                 </dl>
               </div>

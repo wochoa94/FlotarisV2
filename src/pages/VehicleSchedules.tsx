@@ -750,7 +750,10 @@ export function VehicleSchedules() {
                       {formatTooltipDate(deleteModal.schedule.startDate)} - {formatTooltipDate(deleteModal.schedule.endDate)}
                     </p>
                     <div className="mt-2">
-                      <ScheduleStatusBadge status={deleteModal.schedule.status} />
+                      <Badge 
+                        type={deleteModal.schedule.status === 'active' ? 'green' : deleteModal.schedule.status === 'scheduled' ? 'blue' : 'gray'} 
+                        label={deleteModal.schedule.status === 'active' ? 'Active' : deleteModal.schedule.status === 'scheduled' ? 'Scheduled' : 'Completed'} 
+                      />
                     </div>
                   </div>
                 </div>
