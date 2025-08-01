@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Vehicle, VehicleQueryParams, PaginatedVehiclesResponse } from '../types';
-import { vehicleService } from '../services/apiService';
+import { Vehicle, VehicleQueryParams, PaginatedVehiclesResponse } from '../../../types';
+import { vehicleService } from '../../../services/apiService';
 
 type SortColumn = 'name' | 'status' | 'mileage' | 'maintenanceCost' | 'assignedDriver';
 type SortDirection = 'asc' | 'desc';

@@ -4,7 +4,7 @@ import { Truck, Users, AlertTriangle, TrendingUp, Calendar, DollarSign, Wrench, 
 import { useFleetData } from '../hooks/useFleetData';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { VehicleStatusDonutChart } from '../components/charts/VehicleStatusDonutChart';
+import { VehicleStatusDonutChart } from '../features/vehicles/components/VehicleStatusDonutChart';
 import { formatDate } from '../utils/dateUtils';
 
 export function Dashboard() {
