@@ -7,38 +7,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { formatTooltipDate, getDaysBetweenDates, parseDate, parseDateEnd } from '../utils/dateUtils';
 import { formatDate } from '../utils/dateUtils';
 
-// Status badge component for vehicle schedules (copied from VehicleSchedules.tsx)
-function ScheduleStatusBadge({ status }: { status: string }) {
-  const statusConfig = {
-    scheduled: {
-      label: 'Scheduled',
-      className: 'bg-blue-100 text-blue-800 border-blue-200',
-    },
-    active: {
-      label: 'Active',
-      className: 'bg-green-100 text-green-800 border-green-200',
-    },
-    completed: {
-      label: 'Completed',
-      className: 'bg-gray-100 text-gray-800 border-gray-200',
-    },
-  };
-
-  // Default configuration for unrecognized status values
-  const defaultConfig = {
-    label: 'Unknown',
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  };
-
-  // Get configuration for the status, with fallback to default
-  const config = statusConfig[status as keyof typeof statusConfig] || defaultConfig;
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
-      {config.label}
-    </span>
-  );
-}
+import { Badge } from '../components/ui/Badge';
 
 export function DriverDetail() {
   const { id } = useParams<{ id: string }>();
@@ -302,7 +271,10 @@ export function DriverDetail() {
                         {getScheduleDuration(schedule.startDate, schedule.endDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <ScheduleStatusBadge status={schedule.status} />
+                        <Badge 
+                          type={schedule.status === 'active' ? 'green' : schedule.status === 'scheduled' ? 'blue' : 'gray'} 
+                          label={schedule.status === 'active' ? 'Active' : schedule.status === 'scheduled' ? 'Scheduled' : 'Completed'} 
+                        />
                       </td>
                       <td className="px-6 py-4">
                         {schedule.notes ? (

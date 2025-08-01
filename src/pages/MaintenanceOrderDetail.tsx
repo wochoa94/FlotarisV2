@@ -8,35 +8,8 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AuthorizeMaintenanceOrderModal } from '../components/modals/AuthorizeMaintenanceOrderModal';
 import { formatDate } from '../utils/dateUtils';
 
-// Status badge component for maintenance orders
-function MaintenanceStatusBadge({ status }: { status: string }) {
-  const statusConfig = {
-    active: {
-      label: 'Active',
-      className: 'bg-green-100 text-green-800 border-green-200',
-    },
-    scheduled: {
-      label: 'Scheduled',
-      className: 'bg-blue-100 text-blue-800 border-blue-200',
-    },
-    pending_authorization: {
-      label: 'Pending Authorization',
-      className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    },
-    completed: {
-      label: 'Completed',
-      className: 'bg-gray-100 text-gray-800 border-gray-200',
-    },
-  };
-
-  const config = statusConfig[status as keyof typeof statusConfig];
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
-      {config.label}
-    </span>
-  );
-}
+import { Badge } from '../components/ui/Badge';
+import { Alert } from '../components/ui/Alert';
 
 // Enhanced error parsing function
 function parseBackendError(error: Error): { type: 'validation' | 'conflict' | 'authorization' | 'network' | 'generic'; message: string } {
@@ -253,79 +226,46 @@ export function MaintenanceOrderDetail() {
     <div className="space-y-6">
       {/* Success Message */}
       {successMessage && (
-        <div className="rounded-md bg-green-50 border border-green-200 p-4 transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <CheckCircle className="h-5 w-5 text-green-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">{successMessage}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => dismissMessage('success')}
-              className="text-green-400 hover:text-green-600 transition-colors duration-200"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        <Alert
+          type="success"
+          message={successMessage}
+          onDismiss={() => dismissMessage('success')}
+        />
       )}
 
       {/* Enhanced Error Message with Type-specific Styling */}
       {errorMessage && (
-        <div className={`rounded-md border p-4 transition-all duration-300 ${getErrorMessageStyling(errorType)}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                {getErrorIcon(errorType)}
-              </div>
-              <div className="ml-3">
-                <div className="flex items-center space-x-2">
-                  <p className="text-sm font-medium">{errorMessage}</p>
-                  {errorType === 'conflict' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-                      Schedule Conflict
-                    </span>
-                  )}
-                  {errorType === 'validation' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Validation Error
-                    </span>
-                  )}
-                  {errorType === 'authorization' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                      Authorization Error
-                    </span>
-                  )}
-                  {errorType === 'network' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                      Network Error
-                    </span>
-                  )}
-                </div>
-                {/* Additional context for specific error types */}
-                {errorType === 'conflict' && (
-                  <p className="text-xs mt-1 opacity-75">
-                    This maintenance order conflicts with existing schedules. Please check the vehicle's current assignments.
-                  </p>
-                )}
-                {errorType === 'network' && (
-                  <p className="text-xs mt-1 opacity-75">
-                    Please check your internet connection and try again. If the problem persists, contact support.
-                  </p>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={() => dismissMessage('error')}
-              className="transition-colors duration-200 hover:opacity-75"
-            >
-              <X className="h-4 w-4" />
-            </button>
+        <Alert
+          type={errorType}
+          message={errorMessage}
+          onDismiss={() => dismissMessage('error')}
+        >
+          <div className="flex items-center space-x-2 mt-1">
+            {errorType === 'conflict' && (
+              <Badge type="orange" label="Schedule Conflict" size="sm" />
+            )}
+            {errorType === 'validation' && (
+              <Badge type="yellow" label="Validation Error" size="sm" />
+            )}
+            {errorType === 'authorization' && (
+              <Badge type="purple" label="Authorization Error" size="sm" />
+            )}
+            {errorType === 'network' && (
+              <Badge type="blue" label="Network Error" size="sm" />
+            )}
           </div>
-        </div>
+          {/* Additional context for specific error types */}
+          {errorType === 'conflict' && (
+            <p className="text-xs mt-1 opacity-75">
+              This maintenance order conflicts with existing schedules. Please check the vehicle's current assignments.
+            </p>
+          )}
+          {errorType === 'network' && (
+            <p className="text-xs mt-1 opacity-75">
+              Please check your internet connection and try again. If the problem persists, contact support.
+            </p>
+          )}
+        </Alert>
       )}
 
       {/* Header */}
@@ -381,13 +321,15 @@ export function MaintenanceOrderDetail() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Status</dt>
                   <dd className="mt-1">
-                    <MaintenanceStatusBadge status={order.status} />
+                    <Badge 
+                      type={order.status === 'active' ? 'green' : order.status === 'scheduled' ? 'blue' : order.status === 'pending_authorization' ? 'yellow' : 'gray'} 
+                      label={order.status === 'active' ? 'Active' : order.status === 'scheduled' ? 'Scheduled' : order.status === 'pending_authorization' ? 'Pending Authorization' : 'Completed'} 
+                    />
                     {order.urgent && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                        <Badge type="red" label="Urgent" size="sm" className="mt-1">
                           <AlertTriangle className="h-3 w-3 mr-1" />
-                          Urgent
-                        </span>
+                        </Badge>
                       </div>
                     )}
                   </dd>
@@ -472,7 +414,10 @@ export function MaintenanceOrderDetail() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Status</dt>
                 <dd className="mt-1">
-                  <MaintenanceStatusBadge status={order.status} />
+                  <Badge 
+                    type={order.status === 'active' ? 'green' : order.status === 'scheduled' ? 'blue' : order.status === 'pending_authorization' ? 'yellow' : 'gray'} 
+                    label={order.status === 'active' ? 'Active' : order.status === 'scheduled' ? 'Scheduled' : order.status === 'pending_authorization' ? 'Pending Authorization' : 'Completed'} 
+                  />
                 </dd>
               </div>
               <div>
@@ -508,10 +453,9 @@ export function MaintenanceOrderDetail() {
                 <dt className="text-sm font-medium text-gray-500">Priority</dt>
                 <dd className="mt-1">
                   {order.urgent ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                    <Badge type="red" label="Urgent" size="sm">
                       <AlertTriangle className="h-3 w-3 mr-1" />
-                      Urgent
-                    </span>
+                    </Badge>
                   ) : (
                     <span className="text-sm text-gray-900">Normal</span>
                   )}
