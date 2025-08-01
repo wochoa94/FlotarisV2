@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Vehicle } from '../types';
-import { vehicleService } from '../services/apiService';
+import { Vehicle } from '../../../types';
+import { vehicleService } from '../../../services/apiService';
 
 interface UseVehicleDetailsReturn {
   vehicle: Vehicle | null;

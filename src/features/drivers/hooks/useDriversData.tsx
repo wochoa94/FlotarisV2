@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MaintenanceOrder, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary } from '../types';
-import { maintenanceOrderService } from '../services/apiService';
+import { Driver, DriverQueryParams, PaginatedDriversResponse } from '../../../types';
+import { driverService } from '../../../services/apiService';
 
-type SortColumn = 'orderNumber' | 'vehicleName' | 'startDate' | 'estimatedCompletionDate' | 'cost' | 'status';
+type SortColumn = 'name' | 'email' | 'idNumber' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
 
-interface UseMaintenanceOrdersDataReturn {
+interface UseDriversDataReturn {
   // Data
-  maintenanceOrders: MaintenanceOrder[];
+  drivers: Driver[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
@@ -17,7 +17,7 @@ interface UseMaintenanceOrdersDataReturn {
   
   // State
   searchTerm: string;
-  statusFilters: string[];
+  emailSearchTerm: string;
   sortBy: SortColumn | null;
   sortOrder: SortDirection;
   itemsPerPage: number;
@@ -26,36 +26,30 @@ interface UseMaintenanceOrdersDataReturn {
   
   // Actions
   setSearchTerm: (term: string) => void;
-  toggleStatusFilter: (status: string) => void;
-  clearStatusFilters: () => void;
+  setEmailSearchTerm: (term: string) => void;
   setSorting: (column: SortColumn) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (limit: number) => void;
   clearAllFilters: () => void;
   refreshData: () => Promise<void>;
-
-  // Summary data
-  maintenanceOrderSummary: MaintenanceOrderSummary | null;
 }
 
-export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
+export function useDriversData(): UseDriversDataReturn {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize state from URL parameters
   const getInitialState = () => {
     const search = searchParams.get('search') || '';
-    const status = searchParams.getAll('status');
-    // If no status filters are specified in URL, use backend's default filters
-    const defaultStatusFilters = status.length > 0 ? status : ['active', 'scheduled', 'pending_authorization'];
+    const emailSearch = searchParams.get('emailSearch') || '';
     const sortBy = searchParams.get('sortBy') as SortColumn | null;
-    const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'desc'; // Default to newest first
+    const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'asc';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     
     return {
       search,
-      status: defaultStatusFilters,
-      sortBy: sortBy || 'startDate', // Default sort by start date
+      emailSearch,
+      sortBy,
       sortOrder,
       page,
       limit,
@@ -66,27 +60,28 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
   
   // State variables
   const [searchTerm, setSearchTermState] = useState(initialState.search);
-  const [statusFilters, setStatusFilters] = useState<string[]>(initialState.status);
+  const [emailSearchTerm, setEmailSearchTermState] = useState(initialState.emailSearch);
   const [sortBy, setSortByState] = useState<SortColumn | null>(initialState.sortBy);
   const [sortOrder, setSortOrderState] = useState<SortDirection>(initialState.sortOrder);
   const [currentPage, setCurrentPageState] = useState(initialState.page);
   const [itemsPerPage, setItemsPerPageState] = useState(initialState.limit);
   
   // Data state
-  const [maintenanceOrders, setMaintenanceOrders] = useState<MaintenanceOrder[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [maintenanceOrderSummary, setMaintenanceOrderSummary] = useState<MaintenanceOrderSummary | null>(null);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const emailSearchTimeoutRef = useRef<NodeJS.Timeout>();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [debouncedEmailSearchTerm, setDebouncedEmailSearchTerm] = useState(emailSearchTerm);
 
-  // Debounce search term
+  // Debounce search terms
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -103,19 +98,35 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     };
   }, [searchTerm]);
 
+  useEffect(() => {
+    if (emailSearchTimeoutRef.current) {
+      clearTimeout(emailSearchTimeoutRef.current);
+    }
+    
+    emailSearchTimeoutRef.current = setTimeout(() => {
+      setDebouncedEmailSearchTerm(emailSearchTerm);
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (emailSearchTimeoutRef.current) {
+        clearTimeout(emailSearchTimeoutRef.current);
+      }
+    };
+  }, [emailSearchTerm]);
+
   // Update URL parameters when state changes
   const updateUrlParams = useCallback(() => {
     const params = new URLSearchParams();
     
     if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
-    statusFilters.forEach(status => params.append('status', status));
+    if (debouncedEmailSearchTerm) params.set('emailSearch', debouncedEmailSearchTerm);
     if (sortBy) params.set('sortBy', sortBy);
-    if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
+    if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
     if (itemsPerPage !== 10) params.set('limit', itemsPerPage.toString());
     
     setSearchParams(params, { replace: true });
-  }, [debouncedSearchTerm, statusFilters, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
+  }, [debouncedSearchTerm, debouncedEmailSearchTerm, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
 
   // Fetch data function
   const fetchData = useCallback(async () => {
@@ -123,40 +134,34 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     setError(null);
     
     try {
-      const queryParams: MaintenanceOrderQueryParams = {
+      const queryParams: DriverQueryParams = {
         search: debouncedSearchTerm || undefined,
-        status: statusFilters.length > 0 ? statusFilters : undefined,
+        emailSearch: debouncedEmailSearchTerm || undefined,
         sortBy: sortBy || undefined,
         sortOrder,
         page: currentPage,
         limit: itemsPerPage,
       };
 
-      // Fetch both paginated data and summary concurrently
-      const [response, summaryResponse]: [PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary] = await Promise.all([
-        maintenanceOrderService.fetchPaginatedMaintenanceOrders(queryParams),
-        maintenanceOrderService.fetchMaintenanceOrderSummary()
-      ]);
+      const response: PaginatedDriversResponse = await driverService.fetchPaginatedDrivers(queryParams);
       
-      setMaintenanceOrders(response.maintenanceOrders);
+      setDrivers(response.drivers);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
-      setMaintenanceOrderSummary(summaryResponse);
     } catch (err) {
-      console.error('Error fetching maintenance orders:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch maintenance orders');
-      setMaintenanceOrders([]);
+      console.error('Error fetching drivers:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch drivers');
+      setDrivers([]);
       setTotalCount(0);
       setTotalPages(0);
       setHasNextPage(false);
       setHasPreviousPage(false);
-      setMaintenanceOrderSummary(null);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm, statusFilters, sortBy, sortOrder, currentPage, itemsPerPage]);
+  }, [debouncedSearchTerm, debouncedEmailSearchTerm, sortBy, sortOrder, currentPage, itemsPerPage]);
 
   // Effect to fetch data when dependencies change
   useEffect(() => {
@@ -174,19 +179,9 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     setCurrentPageState(1); // Reset to first page when searching
   }, []);
 
-  const toggleStatusFilter = useCallback((status: string) => {
-    setStatusFilters(prev => {
-      const newFilters = prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status];
-      setCurrentPageState(1); // Reset to first page when filtering
-      return newFilters;
-    });
-  }, []);
-
-  const clearStatusFilters = useCallback(() => {
-    setStatusFilters([]);
-    setCurrentPageState(1);
+  const setEmailSearchTerm = useCallback((term: string) => {
+    setEmailSearchTermState(term);
+    setCurrentPageState(1); // Reset to first page when searching
   }, []);
 
   const setSorting = useCallback((column: SortColumn) => {
@@ -212,9 +207,9 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
 
   const clearAllFilters = useCallback(() => {
     setSearchTermState('');
-    setStatusFilters([]);
-    setSortByState('startDate');
-    setSortOrderState('desc');
+    setEmailSearchTermState('');
+    setSortByState(null);
+    setSortOrderState('asc');
     setCurrentPageState(1);
   }, []);
 
@@ -224,7 +219,7 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
 
   return {
     // Data
-    maintenanceOrders,
+    drivers,
     totalCount,
     totalPages,
     currentPage,
@@ -233,7 +228,7 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     
     // State
     searchTerm,
-    statusFilters,
+    emailSearchTerm,
     sortBy,
     sortOrder,
     itemsPerPage,
@@ -242,15 +237,11 @@ export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
     
     // Actions
     setSearchTerm,
-    toggleStatusFilter,
-    clearStatusFilters,
+    setEmailSearchTerm,
     setSorting,
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
     refreshData,
-
-    // Summary data
-    maintenanceOrderSummary,
   };
 }

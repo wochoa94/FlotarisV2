@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { VehicleSchedule, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse, VehicleScheduleSummary } from '../types';
-import { vehicleScheduleService } from '../services/apiService';
+import { VehicleSchedule, VehicleScheduleQueryParams, PaginatedVehicleSchedulesResponse, VehicleScheduleSummary } from '../../../types';
+import { vehicleScheduleService } from '../../../services/apiService';
 
 type SortColumn = 'vehicleName' | 'driverName' | 'startDate' | 'endDate' | 'duration' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -248,6 +248,7 @@ export function useVehicleSchedulesData(): UseVehicleSchedulesDataReturn {
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
+    refreshData,
 
     // Summary data
     vehicleScheduleSummary,

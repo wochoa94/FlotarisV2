@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Driver, DriverQueryParams, PaginatedDriversResponse } from '../types';
-import { driverService } from '../services/apiService';
+import { Vehicle, VehicleQueryParams, PaginatedVehiclesResponse } from '../../../types';
+import { vehicleService } from '../../../services/apiService';
 
-type SortColumn = 'name' | 'email' | 'idNumber' | 'createdAt';
+type SortColumn = 'name' | 'status' | 'mileage' | 'maintenanceCost' | 'assignedDriver';
 type SortDirection = 'asc' | 'desc';
 
-interface UseDriversDataReturn {
+interface UseVehiclesDataReturn {
   // Data
-  drivers: Driver[];
+  vehicles: Vehicle[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
@@ -17,8 +17,9 @@ interface UseDriversDataReturn {
   
   // State
   searchTerm: string;
-  emailSearchTerm: string;
-  sortBy: SortColumn | null;
+  statusFilters: string[];
+  unassignedFilter: boolean;
+  sortBy: SortColumn;
   sortOrder: SortDirection;
   itemsPerPage: number;
   loading: boolean;
@@ -26,7 +27,9 @@ interface UseDriversDataReturn {
   
   // Actions
   setSearchTerm: (term: string) => void;
-  setEmailSearchTerm: (term: string) => void;
+  toggleStatusFilter: (status: string) => void;
+  clearStatusFilters: () => void;
+  setUnassignedFilter: (value: boolean) => void;
   setSorting: (column: SortColumn) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (limit: number) => void;
@@ -34,21 +37,23 @@ interface UseDriversDataReturn {
   refreshData: () => Promise<void>;
 }
 
-export function useDriversData(): UseDriversDataReturn {
+export function useVehiclesData(): UseVehiclesDataReturn {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize state from URL parameters
   const getInitialState = () => {
     const search = searchParams.get('search') || '';
-    const emailSearch = searchParams.get('emailSearch') || '';
-    const sortBy = searchParams.get('sortBy') as SortColumn | null;
+    const status = searchParams.getAll('status');
+    const unassigned = searchParams.get('unassigned') === 'true';
+    const sortBy = (searchParams.get('sortBy') as SortColumn) || 'status'; // Default to status sort
     const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'asc';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     
     return {
       search,
-      emailSearch,
+      status,
+      unassigned,
       sortBy,
       sortOrder,
       page,
@@ -60,14 +65,15 @@ export function useDriversData(): UseDriversDataReturn {
   
   // State variables
   const [searchTerm, setSearchTermState] = useState(initialState.search);
-  const [emailSearchTerm, setEmailSearchTermState] = useState(initialState.emailSearch);
-  const [sortBy, setSortByState] = useState<SortColumn | null>(initialState.sortBy);
+  const [statusFilters, setStatusFilters] = useState<string[]>(initialState.status);
+  const [unassignedFilter, setUnassignedFilterState] = useState(initialState.unassigned);
+  const [sortBy, setSortByState] = useState<SortColumn>(initialState.sortBy);
   const [sortOrder, setSortOrderState] = useState<SortDirection>(initialState.sortOrder);
   const [currentPage, setCurrentPageState] = useState(initialState.page);
   const [itemsPerPage, setItemsPerPageState] = useState(initialState.limit);
   
   // Data state
-  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -77,11 +83,9 @@ export function useDriversData(): UseDriversDataReturn {
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
-  const emailSearchTimeoutRef = useRef<NodeJS.Timeout>();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [debouncedEmailSearchTerm, setDebouncedEmailSearchTerm] = useState(emailSearchTerm);
 
-  // Debounce search terms
+  // Debounce search term
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -98,35 +102,20 @@ export function useDriversData(): UseDriversDataReturn {
     };
   }, [searchTerm]);
 
-  useEffect(() => {
-    if (emailSearchTimeoutRef.current) {
-      clearTimeout(emailSearchTimeoutRef.current);
-    }
-    
-    emailSearchTimeoutRef.current = setTimeout(() => {
-      setDebouncedEmailSearchTerm(emailSearchTerm);
-    }, 300); // 300ms debounce
-
-    return () => {
-      if (emailSearchTimeoutRef.current) {
-        clearTimeout(emailSearchTimeoutRef.current);
-      }
-    };
-  }, [emailSearchTerm]);
-
   // Update URL parameters when state changes
   const updateUrlParams = useCallback(() => {
     const params = new URLSearchParams();
     
     if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
-    if (debouncedEmailSearchTerm) params.set('emailSearch', debouncedEmailSearchTerm);
-    if (sortBy) params.set('sortBy', sortBy);
+    statusFilters.forEach(status => params.append('status', status));
+    if (unassignedFilter) params.set('unassigned', 'true');
+    if (sortBy !== 'status') params.set('sortBy', sortBy); // Only add to URL if not default
     if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
     if (itemsPerPage !== 10) params.set('limit', itemsPerPage.toString());
     
     setSearchParams(params, { replace: true });
-  }, [debouncedSearchTerm, debouncedEmailSearchTerm, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
+  }, [debouncedSearchTerm, statusFilters, unassignedFilter, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
 
   // Fetch data function
   const fetchData = useCallback(async () => {
@@ -134,26 +123,27 @@ export function useDriversData(): UseDriversDataReturn {
     setError(null);
     
     try {
-      const queryParams: DriverQueryParams = {
+      const queryParams: VehicleQueryParams = {
         search: debouncedSearchTerm || undefined,
-        emailSearch: debouncedEmailSearchTerm || undefined,
-        sortBy: sortBy || undefined,
+        status: statusFilters.length > 0 ? statusFilters : undefined,
+        unassignedOnly: unassignedFilter || undefined,
+        sortBy: sortBy,
         sortOrder,
         page: currentPage,
         limit: itemsPerPage,
       };
 
-      const response: PaginatedDriversResponse = await driverService.fetchPaginatedDrivers(queryParams);
+      const response: PaginatedVehiclesResponse = await vehicleService.fetchPaginatedVehicles(queryParams);
       
-      setDrivers(response.drivers);
+      setVehicles(response.vehicles);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
     } catch (err) {
-      console.error('Error fetching drivers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch drivers');
-      setDrivers([]);
+      console.error('Error fetching vehicles:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch vehicles');
+      setVehicles([]);
       setTotalCount(0);
       setTotalPages(0);
       setHasNextPage(false);
@@ -161,7 +151,7 @@ export function useDriversData(): UseDriversDataReturn {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm, debouncedEmailSearchTerm, sortBy, sortOrder, currentPage, itemsPerPage]);
+  }, [debouncedSearchTerm, statusFilters, unassignedFilter, sortBy, sortOrder, currentPage, itemsPerPage]);
 
   // Effect to fetch data when dependencies change
   useEffect(() => {
@@ -179,9 +169,24 @@ export function useDriversData(): UseDriversDataReturn {
     setCurrentPageState(1); // Reset to first page when searching
   }, []);
 
-  const setEmailSearchTerm = useCallback((term: string) => {
-    setEmailSearchTermState(term);
-    setCurrentPageState(1); // Reset to first page when searching
+  const toggleStatusFilter = useCallback((status: string) => {
+    setStatusFilters(prev => {
+      const newFilters = prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status];
+      setCurrentPageState(1); // Reset to first page when filtering
+      return newFilters;
+    });
+  }, []);
+
+  const clearStatusFilters = useCallback(() => {
+    setStatusFilters([]);
+    setCurrentPageState(1);
+  }, []);
+
+  const setUnassignedFilter = useCallback((value: boolean) => {
+    setUnassignedFilterState(value);
+    setCurrentPageState(1); // Reset to first page when filtering
   }, []);
 
   const setSorting = useCallback((column: SortColumn) => {
@@ -207,8 +212,9 @@ export function useDriversData(): UseDriversDataReturn {
 
   const clearAllFilters = useCallback(() => {
     setSearchTermState('');
-    setEmailSearchTermState('');
-    setSortByState(null);
+    setStatusFilters([]);
+    setUnassignedFilterState(false);
+    setSortByState('status'); // Reset to default status sort
     setSortOrderState('asc');
     setCurrentPageState(1);
   }, []);
@@ -219,7 +225,7 @@ export function useDriversData(): UseDriversDataReturn {
 
   return {
     // Data
-    drivers,
+    vehicles,
     totalCount,
     totalPages,
     currentPage,
@@ -228,7 +234,8 @@ export function useDriversData(): UseDriversDataReturn {
     
     // State
     searchTerm,
-    emailSearchTerm,
+    statusFilters,
+    unassignedFilter,
     sortBy,
     sortOrder,
     itemsPerPage,
@@ -237,7 +244,9 @@ export function useDriversData(): UseDriversDataReturn {
     
     // Actions
     setSearchTerm,
-    setEmailSearchTerm,
+    toggleStatusFilter,
+    clearStatusFilters,
+    setUnassignedFilter,
     setSorting,
     setCurrentPage,
     setItemsPerPage,

@@ -3,40 +3,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Plus, Search, Filter, Wrench, Calendar, Clock, DollarSign, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useMaintenanceOrdersData } from '../hooks/useMaintenanceOrdersData';
+import { useMaintenanceOrdersData } from '../features/maintenance-orders/hooks/useMaintenanceOrdersData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { MaintenanceOrder } from '../types';
 import { formatDate } from '../utils/dateUtils';
 
-// Status badge component for maintenance orders
-function MaintenanceStatusBadge({ status }: { status: MaintenanceOrder['status'] }) {
-  const statusConfig = {
-    active: {
-      label: 'Active',
-      className: 'bg-green-100 text-green-800 border-green-200',
-    },
-    scheduled: {
-      label: 'Scheduled',
-      className: 'bg-blue-100 text-blue-800 border-blue-200',
-    },
-    pending_authorization: {
-      label: 'Pending Authorization',
-      className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    },
-    completed: {
-      label: 'Completed',
-      className: 'bg-gray-100 text-gray-800 border-gray-200',
-    },
-  };
-
-  const config = statusConfig[status];
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
-      {config.label}
-    </span>
-  );
-}
+import { Badge } from '../components/ui/Badge';
 
 export function MaintenanceOrders() {
   const { user } = useAuth();
@@ -483,13 +455,15 @@ export function MaintenanceOrders() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <MaintenanceStatusBadge status={order.status} />
+                      <Badge 
+                        type={order.status === 'active' ? 'green' : order.status === 'scheduled' ? 'blue' : order.status === 'pending_authorization' ? 'yellow' : 'gray'} 
+                        label={order.status === 'active' ? 'Active' : order.status === 'scheduled' ? 'Scheduled' : order.status === 'pending_authorization' ? 'Pending Authorization' : 'Completed'} 
+                      />
                       {order.urgent && (
                         <div className="mt-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                          <Badge type="red" label="Urgent" size="sm" className="mt-1">
                             <AlertTriangle className="h-3 w-3 mr-1" />
-                            Urgent
-                          </span>
+                          </Badge>
                         </div>
                       )}
                     </td>

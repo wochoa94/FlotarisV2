@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Vehicle, VehicleQueryParams, PaginatedVehiclesResponse } from '../types';
-import { vehicleService } from '../services/apiService';
+import { MaintenanceOrder, MaintenanceOrderQueryParams, PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary } from '../../../types';
+import { maintenanceOrderService } from '../../../services/apiService';
 
-type SortColumn = 'name' | 'status' | 'mileage' | 'maintenanceCost' | 'assignedDriver';
+type SortColumn = 'orderNumber' | 'vehicleName' | 'startDate' | 'estimatedCompletionDate' | 'cost' | 'status';
 type SortDirection = 'asc' | 'desc';
 
-interface UseVehiclesDataReturn {
+interface UseMaintenanceOrdersDataReturn {
   // Data
-  vehicles: Vehicle[];
+  maintenanceOrders: MaintenanceOrder[];
   totalCount: number;
   totalPages: number;
   currentPage: number;
@@ -18,8 +18,7 @@ interface UseVehiclesDataReturn {
   // State
   searchTerm: string;
   statusFilters: string[];
-  unassignedFilter: boolean;
-  sortBy: SortColumn;
+  sortBy: SortColumn | null;
   sortOrder: SortDirection;
   itemsPerPage: number;
   loading: boolean;
@@ -29,32 +28,34 @@ interface UseVehiclesDataReturn {
   setSearchTerm: (term: string) => void;
   toggleStatusFilter: (status: string) => void;
   clearStatusFilters: () => void;
-  setUnassignedFilter: (value: boolean) => void;
   setSorting: (column: SortColumn) => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (limit: number) => void;
   clearAllFilters: () => void;
   refreshData: () => Promise<void>;
+
+  // Summary data
+  maintenanceOrderSummary: MaintenanceOrderSummary | null;
 }
 
-export function useVehiclesData(): UseVehiclesDataReturn {
+export function useMaintenanceOrdersData(): UseMaintenanceOrdersDataReturn {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize state from URL parameters
   const getInitialState = () => {
     const search = searchParams.get('search') || '';
     const status = searchParams.getAll('status');
-    const unassigned = searchParams.get('unassigned') === 'true';
-    const sortBy = (searchParams.get('sortBy') as SortColumn) || 'status'; // Default to status sort
-    const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'asc';
+    // If no status filters are specified in URL, use backend's default filters
+    const defaultStatusFilters = status.length > 0 ? status : ['active', 'scheduled', 'pending_authorization'];
+    const sortBy = searchParams.get('sortBy') as SortColumn | null;
+    const sortOrder = (searchParams.get('sortOrder') as SortDirection) || 'desc'; // Default to newest first
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     
     return {
       search,
-      status,
-      unassigned,
-      sortBy,
+      status: defaultStatusFilters,
+      sortBy: sortBy || 'startDate', // Default sort by start date
       sortOrder,
       page,
       limit,
@@ -66,20 +67,20 @@ export function useVehiclesData(): UseVehiclesDataReturn {
   // State variables
   const [searchTerm, setSearchTermState] = useState(initialState.search);
   const [statusFilters, setStatusFilters] = useState<string[]>(initialState.status);
-  const [unassignedFilter, setUnassignedFilterState] = useState(initialState.unassigned);
-  const [sortBy, setSortByState] = useState<SortColumn>(initialState.sortBy);
+  const [sortBy, setSortByState] = useState<SortColumn | null>(initialState.sortBy);
   const [sortOrder, setSortOrderState] = useState<SortDirection>(initialState.sortOrder);
   const [currentPage, setCurrentPageState] = useState(initialState.page);
   const [itemsPerPage, setItemsPerPageState] = useState(initialState.limit);
   
   // Data state
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [maintenanceOrders, setMaintenanceOrders] = useState<MaintenanceOrder[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [maintenanceOrderSummary, setMaintenanceOrderSummary] = useState<MaintenanceOrderSummary | null>(null);
 
   // Debouncing for search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
@@ -108,14 +109,13 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     
     if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
     statusFilters.forEach(status => params.append('status', status));
-    if (unassignedFilter) params.set('unassigned', 'true');
-    if (sortBy !== 'status') params.set('sortBy', sortBy); // Only add to URL if not default
-    if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
+    if (sortBy) params.set('sortBy', sortBy);
+    if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
     if (itemsPerPage !== 10) params.set('limit', itemsPerPage.toString());
     
     setSearchParams(params, { replace: true });
-  }, [debouncedSearchTerm, statusFilters, unassignedFilter, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
+  }, [debouncedSearchTerm, statusFilters, sortBy, sortOrder, currentPage, itemsPerPage, setSearchParams]);
 
   // Fetch data function
   const fetchData = useCallback(async () => {
@@ -123,35 +123,40 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     setError(null);
     
     try {
-      const queryParams: VehicleQueryParams = {
+      const queryParams: MaintenanceOrderQueryParams = {
         search: debouncedSearchTerm || undefined,
         status: statusFilters.length > 0 ? statusFilters : undefined,
-        unassignedOnly: unassignedFilter || undefined,
-        sortBy: sortBy,
+        sortBy: sortBy || undefined,
         sortOrder,
         page: currentPage,
         limit: itemsPerPage,
       };
 
-      const response: PaginatedVehiclesResponse = await vehicleService.fetchPaginatedVehicles(queryParams);
+      // Fetch both paginated data and summary concurrently
+      const [response, summaryResponse]: [PaginatedMaintenanceOrdersResponse, MaintenanceOrderSummary] = await Promise.all([
+        maintenanceOrderService.fetchPaginatedMaintenanceOrders(queryParams),
+        maintenanceOrderService.fetchMaintenanceOrderSummary()
+      ]);
       
-      setVehicles(response.vehicles);
+      setMaintenanceOrders(response.maintenanceOrders);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
       setHasNextPage(response.hasNextPage);
       setHasPreviousPage(response.hasPreviousPage);
+      setMaintenanceOrderSummary(summaryResponse);
     } catch (err) {
-      console.error('Error fetching vehicles:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch vehicles');
-      setVehicles([]);
+      console.error('Error fetching maintenance orders:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch maintenance orders');
+      setMaintenanceOrders([]);
       setTotalCount(0);
       setTotalPages(0);
       setHasNextPage(false);
       setHasPreviousPage(false);
+      setMaintenanceOrderSummary(null);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm, statusFilters, unassignedFilter, sortBy, sortOrder, currentPage, itemsPerPage]);
+  }, [debouncedSearchTerm, statusFilters, sortBy, sortOrder, currentPage, itemsPerPage]);
 
   // Effect to fetch data when dependencies change
   useEffect(() => {
@@ -184,11 +189,6 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     setCurrentPageState(1);
   }, []);
 
-  const setUnassignedFilter = useCallback((value: boolean) => {
-    setUnassignedFilterState(value);
-    setCurrentPageState(1); // Reset to first page when filtering
-  }, []);
-
   const setSorting = useCallback((column: SortColumn) => {
     if (sortBy === column) {
       // Toggle sort order if same column
@@ -213,9 +213,8 @@ export function useVehiclesData(): UseVehiclesDataReturn {
   const clearAllFilters = useCallback(() => {
     setSearchTermState('');
     setStatusFilters([]);
-    setUnassignedFilterState(false);
-    setSortByState('status'); // Reset to default status sort
-    setSortOrderState('asc');
+    setSortByState('startDate');
+    setSortOrderState('desc');
     setCurrentPageState(1);
   }, []);
 
@@ -225,7 +224,7 @@ export function useVehiclesData(): UseVehiclesDataReturn {
 
   return {
     // Data
-    vehicles,
+    maintenanceOrders,
     totalCount,
     totalPages,
     currentPage,
@@ -235,7 +234,6 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     // State
     searchTerm,
     statusFilters,
-    unassignedFilter,
     sortBy,
     sortOrder,
     itemsPerPage,
@@ -246,11 +244,13 @@ export function useVehiclesData(): UseVehiclesDataReturn {
     setSearchTerm,
     toggleStatusFilter,
     clearStatusFilters,
-    setUnassignedFilter,
     setSorting,
     setCurrentPage,
     setItemsPerPage,
     clearAllFilters,
     refreshData,
+
+    // Summary data
+    maintenanceOrderSummary,
   };
 }
