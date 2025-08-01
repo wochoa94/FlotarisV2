@@ -20,6 +20,7 @@ import { VehicleSchedules } from './pages/VehicleSchedules';
 import { AddVehicleSchedule } from './pages/AddVehicleSchedule';
 import { SchedulesOverview } from './pages/SchedulesOverview';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { ThemeProvider, ThemeName } from './theme'; // Import ThemeProvider and ThemeName
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
@@ -160,11 +161,17 @@ function AppRoutes() {
 }
 
 function App() {
+  // Read the theme from an environment variable set at build time
+  // Default to 'default' if the environment variable is not set or recognized
+  const appTheme: ThemeName = (import.meta.env.VITE_APP_THEME as ThemeName) || 'default';
+
   return (
     <Router>
       <AuthProvider>
         <FleetDataProvider>
-          <AppRoutes />
+          <ThemeProvider initialTheme={appTheme}> {/* Pass the determined theme */}
+            <AppRoutes />
+          </ThemeProvider>
         </FleetDataProvider>
       </AuthProvider>
     </Router>
