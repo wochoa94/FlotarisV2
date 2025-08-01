@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Eye, Edit, Plus, Search, Filter, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, RotateCcw } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useVehiclesData } from '../hooks/useVehiclesData';
-import { StatusBadge } from '../components/ui/StatusBadge';
+import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 
@@ -370,7 +370,10 @@ export function Vehicles() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={vehicle.status} />
+                      <Badge 
+                        type={vehicle.status === 'active' ? 'green' : vehicle.status === 'maintenance' ? 'orange' : 'red'} 
+                        label={vehicle.status === 'active' ? 'Active' : vehicle.status === 'maintenance' ? 'Maintenance' : 'Idle'} 
+                      />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
                       {vehicle.vin || 'N/A'}
