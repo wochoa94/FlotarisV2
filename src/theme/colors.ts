@@ -1,31 +1,31 @@
 // src/theme/colors.ts
 export const themes = {
   default: {
-    '--color-primary': '#2563eb', // blue-600
-    '--color-primary-hover': '#1d4ed8', // blue-700
-    '--color-primary-focus-ring': '#3b82f6', // blue-500
-    '--color-secondary': '#4b5563', // gray-600
-    '--color-secondary-hover': '#374151', // gray-700
-    '--color-secondary-focus-ring': '#6b7280', // gray-500
-    '--color-success': '#10b981', // green-500
-    '--color-success-hover': '#059669', // green-600
-    '--color-success-focus-ring': '#34d399', // green-400
-    '--color-warning': '#f59e0b', // yellow-500
-    '--color-warning-hover': '#d97706', // yellow-600
-    '--color-warning-focus-ring': '#fcd34d', // yellow-300
-    '--color-danger': '#ef4444', // red-500
-    '--color-danger-hover': '#dc2626', // red-600
-    '--color-danger-focus-ring': '#f87171', // red-400
-    '--color-info': '#3b82f6', // blue-500
-    '--color-info-hover': '#2563eb', // blue-600
-    '--color-info-focus-ring': '#60a5fa', // blue-400
-    '--color-background': '#f9fafb', // gray-50
-    '--color-background-alt': '#ffffff', // white
-    '--color-text-default': '#111827', // gray-900
-    '--color-text-secondary': '#6b7280', // gray-500
-    '--color-border': '#e5e7eb', // gray-200
-    '--color-input-border': '#d1d5db', // gray-300
-    '--color-input-placeholder': '#9ca3af', // gray-400
+    '--color-primary': '#073459', // blue-600
+    '--color-primary-hover': '#094C84', // blue-700
+    '--color-primary-focus-ring': '#266FC8', // blue-500
+    '--color-secondary': '#F28325', // gray-600
+    '--color-secondary-hover': '#EEB17E', // gray-700
+    '--color-secondary-focus-ring': '#D26000', // gray-500
+    '--color-success': '#A9D6C0', // green-500
+    '--color-success-hover': '#32674E', // green-600
+    '--color-success-focus-ring': '#64B48E', // green-400
+    '--color-warning': '#F5C870', // yellow-500
+    '--color-warning-hover': '#F8DAA0', // yellow-600
+    '--color-warning-focus-ring': '#F0AC29', // yellow-300
+    '--color-danger': '#EBADAD', // red-500
+    '--color-danger-hover': '#D75B5B', // red-600
+    '--color-danger-focus-ring': '#CD3232', // red-400
+    '--color-info': '#E2F2FF', // blue-500
+    '--color-info-hover': '#B8DEFE', // blue-600
+    '--color-info-focus-ring': '#2C94EB', // blue-400
+    '--color-background': '#FAFAFA', // gray-50
+    '--color-background-alt': '#FAFAFA', // white
+    '--color-text-default': '#073459', // gray-900
+    '--color-text-secondary': '#B8DEFE', // gray-500
+    '--color-border': '#EEEFF3', // gray-200
+    '--color-input-border': '#C1C4D7', // gray-300
+    '--color-input-placeholder': '#9A9EB4', // gray-400
   },
   customerA: {
     '--color-primary': '#8b5cf6', // purple-500
