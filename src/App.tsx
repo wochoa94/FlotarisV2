@@ -29,7 +29,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Show loading spinner during authentication or data reconciliation
   if (authLoading || isReconciling) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <LoadingSpinner size="lg" />
           <p className="mt-4 text-sm text-gray-600">

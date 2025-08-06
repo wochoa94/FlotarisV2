@@ -12,7 +12,7 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <LoadingSpinner size="lg" text="Loading dashboard..." />
         </div>
@@ -22,7 +22,7 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <div className="text-red-600 mb-4 font-medium">{error}</div>

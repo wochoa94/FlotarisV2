@@ -15,7 +15,7 @@ export function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     );
