@@ -20,7 +20,7 @@ export const themes = {
     '--color-info-hover': '#B8DEFE', // blue-600
     '--color-info-focus-ring': '#2C94EB', // blue-400
     '--color-background': '#FAFAFA', // gray-50
-    '--color-background-alt': '#FAFAFA', // white
+    '--color-background-alt': '#F28325', // white
     '--color-text-default': '#073459', // gray-900
     '--color-text-secondary': '#B8DEFE', // gray-500
     '--color-border': '#EEEFF3', // gray-200
