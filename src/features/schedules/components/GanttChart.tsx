@@ -238,7 +238,7 @@ export function GanttChart({
                             style={{
                               left: position.left,
                               width: position.width,
-                              top: ITEM_MARGIN + (itemIndex % 2) * (ITEM_HEIGHT + ITEM_MARGIN),
+                              top: (ROW_HEIGHT - ITEM_HEIGHT) / 2,
                               height: ITEM_HEIGHT,
                               backgroundColor: item.color
                             }}
