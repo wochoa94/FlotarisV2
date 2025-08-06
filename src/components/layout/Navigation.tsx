@@ -203,7 +203,7 @@ export function Navigation() {
         
         {/* Mobile navigation overlay */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 bg-background z-40 overflow-y-auto" ref={dropdownRef}>
+          <div className="fixed inset-0 bg-background-alt z-40 overflow-y-auto" ref={dropdownRef}>
             <div className="px-4 pt-4 pb-3 space-y-1">
               {/* Mobile header */}
               <div className="flex items-center justify-between pb-4 border-b border-border">
