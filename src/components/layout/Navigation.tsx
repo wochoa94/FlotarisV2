@@ -81,11 +81,6 @@ export function Navigation() {
             <Link to="/" className="flex items-center">
               {/* Use the new Logo component */}
               <Logo className="h-8 w-8 flex-shrink-0" />
-              
-              {/* Flotaris text - visible when expanded */}
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
-                <span className="text-xl font-bold text-text-default">Flotaris</span>
-              </div>
             </Link>
           </div>
 
@@ -160,7 +155,6 @@ export function Navigation() {
               <Link to="/" className="flex-shrink-0 flex items-center">
                 <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
                   <Logo className="h-8 w-8 flex-shrink-0" />
-                  <span className="ml-2 text-xl font-bold text-text-default">Flotaris</span>
                 </div>
               </Link>
             </div>
@@ -209,7 +203,6 @@ export function Navigation() {
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center">
                   <Logo className="h-8 w-8 flex-shrink-0" />
-                  <span className="ml-2 text-xl font-bold text-text-default">Flotaris</span>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
