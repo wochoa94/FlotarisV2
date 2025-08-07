@@ -151,12 +151,7 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              {/* Logo */}
-              <Link to="/" className="flex-shrink-0 flex items-center">
-                <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
-                  <Logo logoKey="default" className="h-[42.1px] w-auto flex-shrink-0" />
-                </div>
-              </Link>
+             
             </div>
 
             {/* Right side */}
