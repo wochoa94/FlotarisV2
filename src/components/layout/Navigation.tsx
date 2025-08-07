@@ -78,9 +78,6 @@ export function Navigation() {
         <div className="flex flex-col w-full">
           {/* Logo Section */}
           <div className="flex items-center justify-start h-16 px-3 border-b border-gray-200">
-            <Link to="/" className="flex items-center">
-              {/* Use the new Logo component */}
-              <Logo className="h-8 w-8 flex-shrink-0" />
             </Link>
           </div>
 
@@ -154,7 +151,6 @@ export function Navigation() {
               {/* Logo */}
               <Link to="/" className="flex-shrink-0 flex items-center">
                 <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
-                  <Logo className="h-8 w-8 flex-shrink-0" />
                 </div>
               </Link>
             </div>
@@ -202,7 +198,6 @@ export function Navigation() {
               {/* Mobile header */}
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center">
-                  <Logo className="h-8 w-8 flex-shrink-0" />
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
