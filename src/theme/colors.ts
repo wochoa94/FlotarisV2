@@ -3,9 +3,11 @@ export const themes = {
   default: {
     '--color-primary': '#073459', // blue-600
     '--color-primary-hover': '#094C84', // blue-700
+    '--color-primary-400': '#60A5FA', // lighter blue for active background
     '--color-primary-focus-ring': '#266FC8', // blue-500
     '--color-secondary': '#F28325', // gray-600
     '--color-secondary-hover': '#EEB17E', // gray-700
+    '--color-secondary-700': '#D97706', // darker orange for active text/icon
     '--color-secondary-focus-ring': '#D26000', // gray-500
     '--color-success': '#A9D6C0', // green-500
     '--color-success-hover': '#32674E', // green-600

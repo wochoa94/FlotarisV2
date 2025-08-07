@@ -84,32 +84,35 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Navigation Items */}
-          <div className="w-[180px] p-0 space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-white ${
-                    active
-                      ? 'bg-white bg-opacity-20 text-white border-r-2 border-white'
-                      : 'text-white hover:bg-white hover:bg-opacity-10 hover:text-white'
-                  }`}
-                  title={item.name}
-                >
-                  <Icon className={`h-6 w-6 flex-shrink-0 ${
-                    active ? 'text-white' : 'text-white opacity-75'
-                  }`} />
-                  <div className="ml-3 overflow-hidden whitespace-nowrap">
-                    {item.name}
-                  </div>
-                </Link>
-              );
-            })}
+          {/* Dashboard Component Container */}
+          <div className="w-[180px] h-[348px] flex flex-col justify-center items-start gap-5 flex-shrink-0">
+            {/* Navigation Items */}
+            <div className="w-full">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex p-2.5 items-center content-center gap-1.5 self-stretch flex-wrap rounded-lg text-sm font-medium transition-all duration-200 mb-5 last:mb-0 ${
+                      active
+                        ? 'bg-primary-400 text-secondary-700'
+                        : 'bg-primary text-white hover:bg-white hover:bg-opacity-10 hover:text-white'
+                    }`}
+                    title={item.name}
+                  >
+                    <Icon className={`h-6 w-6 flex-shrink-0 ${
+                      active ? 'text-secondary-700' : 'text-white opacity-75'
+                    }`} />
+                    <div className="overflow-hidden whitespace-nowrap">
+                      {item.name}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
           {/* User Section */}

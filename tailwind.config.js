@@ -7,10 +7,12 @@ export default {
         // Primary colors
         primary: 'var(--color-primary)',
         'primary-hover': 'var(--color-primary-hover)',
+        'primary-400': 'var(--color-primary-400)',
         'primary-focus-ring': 'var(--color-primary-focus-ring)',
         // Secondary colors
         secondary: 'var(--color-secondary)',
         'secondary-hover': 'var(--color-secondary-hover)',
+        'secondary-700': 'var(--color-secondary-700)',
         'secondary-focus-ring': 'var(--color-secondary-focus-ring)',
         // Status colors
         success: 'var(--color-success)',
