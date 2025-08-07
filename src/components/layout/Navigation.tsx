@@ -96,16 +96,12 @@ export function Navigation() {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex p-2.5 items-center content-center gap-1.5 self-stretch flex-wrap rounded-lg text-sm font-medium transition-all duration-200 mb-5 last:mb-0 ${
-                      active
-                        ? 'bg-primary-400 text-secondary-700'
-                        : 'bg-primary text-white hover:bg-white hover:bg-opacity-10 hover:text-white'
+                    className={`flex p-2.5 items-center content-center gap-1.5 self-stretch flex-wrap rounded-lg text-sm font-medium transition-colors duration-200 mb-5 last:mb-0 text-primary-400 ${
+                      active ? 'bg-primary' : 'hover:bg-primary'
                     }`}
                     title={item.name}
                   >
-                    <Icon className={`h-6 w-6 flex-shrink-0 ${
-                      active ? 'text-secondary-700' : 'text-white opacity-75'
-                    }`} />
+                    <Icon className="h-6 w-6 flex-shrink-0 text-secondary-700" />
                     <div className="overflow-hidden whitespace-nowrap">
                       {item.name}
                     </div>
