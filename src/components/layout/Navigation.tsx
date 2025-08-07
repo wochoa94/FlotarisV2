@@ -154,7 +154,7 @@ export function Navigation() {
               {/* Logo */}
               <Link to="/" className="flex-shrink-0 flex items-center">
                 <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
-                  <Logo logoKey="alternate" className="h-[42.1px] w-auto flex-shrink-0" />
+                  <Logo logoKey="default" className="h-[42.1px] w-auto flex-shrink-0" />
                 </div>
               </Link>
             </div>
