@@ -74,18 +74,18 @@ export function Navigation() {
   return (
     <>
       {/* Desktop Sidebar Navigation */}
-      <nav className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-20 hover:lg:w-64 lg:bg-white lg:shadow-lg lg:border-r lg:border-gray-200 group transition-all duration-300 ease-in-out">
-        <div className="flex flex-col w-full">
+      <nav className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-[224px] lg:h-[1117px] lg:bg-primary-hover">
+        <div className="flex flex-col w-full lg:px-[22px] lg:pt-[56px] lg:pb-[593px] lg:items-center lg:gap-[77.889px]">
           {/* Logo Section */}
-          <div className="flex items-center justify-start h-16 px-3 border-b border-gray-200">
-            <Link to="/" className="flex items-center">
+          <div className="w-[180px] flex items-center justify-center">
+            <Link to="/" className="flex items-center justify-center">
               {/* Use the new Logo component */}
-              <Logo className="h-14 w-auto flex-shrink-0" />
+              <Logo className="h-[42.1px] w-auto flex-shrink-0" />
             </Link>
           </div>
 
           {/* Navigation Items */}
-          <div className="flex-1 px-2 py-4 space-y-1">
+          <div className="w-[180px] p-0 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -94,17 +94,17 @@ export function Navigation() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-white ${
                     active
-                      ? 'bg-blue-50 text-primary border-r-2 border-primary'
-                      : 'text-text-secondary hover:bg-gray-50 hover:text-text-default'
+                      ? 'bg-white bg-opacity-20 text-white border-r-2 border-white'
+                      : 'text-white hover:bg-white hover:bg-opacity-10 hover:text-white'
                   }`}
                   title={item.name}
                 >
                   <Icon className={`h-6 w-6 flex-shrink-0 ${
-                    active ? 'text-primary' : 'text-gray-400'
+                    active ? 'text-white' : 'text-white opacity-75'
                   }`} />
-                  <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
+                  <div className="ml-3 overflow-hidden whitespace-nowrap">
                     {item.name}
                   </div>
                 </Link>
@@ -113,20 +113,20 @@ export function Navigation() {
           </div>
 
           {/* User Section */}
-          <div className="border-t border-border p-4">
+          <div className="w-[180px]">
             {/* User Info */}
             <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-medium text-primary">
+              <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-medium text-white">
                   {user?.email?.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
-                <div className="text-sm font-medium text-text-default truncate">
+              <div className="ml-3 overflow-hidden whitespace-nowrap">
+                <div className="text-sm font-medium text-white truncate">
                   {user?.email}
                 </div>
                 {user?.isAdmin && (
-                  <div className="text-xs text-primary font-medium">Admin</div>
+                  <div className="text-xs text-white opacity-75 font-medium">Admin</div>
                 )}
               </div>
             </div>
@@ -134,11 +134,11 @@ export function Navigation() {
             {/* Sign Out Button */}
             <button
               onClick={signOut}
-              className="flex items-center w-full px-3 py-2 text-sm font-medium text-text-secondary rounded-lg hover:bg-gray-50 hover:text-text-default transition-colors duration-200"
+              className="flex items-center w-full px-3 py-2 text-sm font-medium text-white rounded-lg hover:bg-white hover:bg-opacity-10 hover:text-white transition-colors duration-200"
               title="Sign Out"
             >
-              <LogOut className="h-5 w-5 flex-shrink-0 text-gray-400" />
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
+              <LogOut className="h-5 w-5 flex-shrink-0 text-white opacity-75" />
+              <div className="ml-3 overflow-hidden whitespace-nowrap">
                 Sign Out
               </div>
             </button>
@@ -154,7 +154,7 @@ export function Navigation() {
               {/* Logo */}
               <Link to="/" className="flex-shrink-0 flex items-center">
                 <div className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
-                  <Logo className="h-14 w-auto flex-shrink-0" />
+                  <Logo className="h-[42.1px] w-auto flex-shrink-0" />
                 </div>
               </Link>
             </div>
@@ -202,7 +202,7 @@ export function Navigation() {
               {/* Mobile header */}
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center">
-                  <Logo className="h-14 w-auto flex-shrink-0" />
+                  <Logo className="h-[42.1px] w-auto flex-shrink-0" />
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
