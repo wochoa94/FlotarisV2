@@ -29,6 +29,7 @@ export const themes = {
     '--color-input-border': '#C1C4D7', // Input Border
     '--color-input-placeholder': '#9A9EB4', // Placeholder
     '--color-primary-400': '#B8DEFE', //Text for navigation bar text
+    '--color-secondary-400': '#FCE8D8',
   },
   customerA: {
     '--color-primary': '#8b5cf6', // purple-500
