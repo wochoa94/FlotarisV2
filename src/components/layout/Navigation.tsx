@@ -96,7 +96,7 @@ export function Navigation() {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex p-2.5 items-center content-center gap-1.5 self-stretch flex-wrap rounded-lg text-sm font-medium transition-colors duration-200 mb-5 last:mb-0 text-navbar-text ${
+                    className={`flex p-2.5 items-center content-center gap-1.5 self-stretch flex-wrap rounded-lg text-sm font-medium transition-colors duration-200 mb-5 last:mb-0 text-primary-400 ${
                       active ? 'bg-primary' : 'hover:bg-primary'
                     }`}
                     title={item.name}
