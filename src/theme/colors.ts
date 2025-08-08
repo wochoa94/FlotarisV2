@@ -3,7 +3,7 @@ export const themes = {
   default: {
     '--color-primary': '#073459', // Primary 900
     '--color-primary-hover': '#094C84', // Primary 800/Hover
-    '--color-primary-400': '#266FC8', // Primary 700
+    '--color-primary-700': '#266FC8', // Primary 700
     '--color-primary-focus-ring': '#2C94EB', // Info Focus Pressed
     '--color-secondary': '#F28325', // Secondary 700
     '--color-secondary-hover': '#EEB17E', // Secondary 600/Hover
@@ -28,7 +28,7 @@ export const themes = {
     '--color-border': '#EEEFF3', // Color Border
     '--color-input-border': '#C1C4D7', // Input Border
     '--color-input-placeholder': '#9A9EB4', // Placeholder
-    '--color-navbar-text': '#B8DEFE', //Text for navigation bar text
+    '--color-primary-400': '#B8DEFE', //Text for navigation bar text
   },
   customerA: {
     '--color-primary': '#8b5cf6', // purple-500
